@@ -10,10 +10,27 @@ public class EggBehavior : MonoBehaviour
     [Header("Egg GPS Position")]
     public Vector2d geoPosition;
 
-    [Header("Distance Settings")]
-    public float activationDistance = 10f; // meters
+    [Header("AR Settings")]
+    public float arDistance = 5f;
 
-    private bool isActive = false;
+
+    [Header("Distance Settings")]
+    public float visibleDistance = 50f; // meters
+    public float glowDistance = 15f;    // meters
+
+    private Renderer eggRenderer;
+    private Material eggMaterial;
+    private bool isGlowing = false;
+
+    void Start()
+    {
+        eggRenderer = GetComponentInChildren<Renderer>();
+        eggMaterial = eggRenderer.material;
+
+        // Start with glow OFF
+        eggMaterial.DisableKeyword("_EMISSION");
+        gameObject.SetActive(false);
+    }
 
     void Update()
     {
@@ -22,34 +39,60 @@ public class EggBehavior : MonoBehaviour
         Vector3 worldPos = map.GeoToWorldPosition(geoPosition, true);
         transform.position = worldPos;
 
-        Debug.Log($"[EGG UPDATE] GPS({geoPosition.x}, {geoPosition.y}) ? World({worldPos})");
-
         float distance = Vector3.Distance(player.position, worldPos);
 
-        // ?? Debug world position + distance
-        Debug.Log($"EGG: {geoPosition.x}, {geoPosition.y} | WORLD POS = {worldPos} | DIST = {distance}");
+        // 1?? Visibility control
+        if (distance <= visibleDistance)
+        {
+            if (!gameObject.activeSelf)
+                gameObject.SetActive(true);
+        }
+        else
+        {
+            if (gameObject.activeSelf)
+                gameObject.SetActive(false);
 
-        if (!isActive && distance <= activationDistance)
-            ActivateEgg();
+            DisableGlow();
+            return;
+        }
 
-        if (isActive && distance > activationDistance)
-            DeactivateEgg();
+        // 2?? Glow control
+        if (distance <= glowDistance)
+        {
+            EnableGlow();
+        }
+        else
+        {
+            DisableGlow();
+        }
 
-        Debug.Log("Egg world pos: " + worldPos);
+        if (distance <= arDistance)
+        {
+            // Egg can be collected in AR
+            gameObject.layer = LayerMask.NameToLayer("Default");
+        }
+        else
+        {
+            DisableGlow();
+        }
 
     }
 
-    void ActivateEgg()
+    void EnableGlow()
     {
-        isActive = true;
-        gameObject.SetActive(true);
-        Debug.Log("Egg Activated!");
+        if (isGlowing) return;
+
+        eggMaterial.EnableKeyword("_EMISSION");
+        eggMaterial.SetColor("_EmissionColor", Color.yellow * 2f);
+        isGlowing = true;
     }
 
-    void DeactivateEgg()
+    void DisableGlow()
     {
-        isActive = false;
-        gameObject.SetActive(false);
-        Debug.Log("Egg Deactivated.");
+        if (!isGlowing) return;
+
+        eggMaterial.SetColor("_EmissionColor", Color.black);
+        eggMaterial.DisableKeyword("_EMISSION");
+        isGlowing = false;
     }
 }

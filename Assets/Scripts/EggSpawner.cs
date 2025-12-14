@@ -11,7 +11,7 @@ public class EggSpawner : MonoBehaviour
 
     public Transform player; // AR Camera
 
-    void Start()
+    /*void Start()
     {
         if (map == null)
         {
@@ -27,15 +27,30 @@ public class EggSpawner : MonoBehaviour
         map.OnInitialized += SpawnEggs;
         SpawnEggs();
 
-        /*#if UNITY_EDITOR
+        *//*#if UNITY_EDITOR
                 // For testing in the Editor without a device, call it directly
                 SpawnEggs();
-        #endif*/
+        #endif*//*
 
         // Subscribe to Mapbox initialization event
         // map.OnInitialized += SpawnEggs;
+    }*/
+
+    void Start()
+    {
+        if (map == null)
+        {
+            Debug.LogError("Map is null!");
+            return;
+        }
+
+        Debug.Log("Map assigned, waiting for OnInitialized...");
+        map.OnInitialized += SpawnEggs;
+
+
     }
-   
+
+
     void SpawnEggs()
     {
         Debug.Log("?? Map initialized — spawning eggs...");
@@ -45,10 +60,16 @@ public class EggSpawner : MonoBehaviour
             GameObject egg = Instantiate(eggPrefab);
             egg.SetActive(true);
 
-            EggBehavior behavior = egg.AddComponent<EggBehavior>();
+            /* EggBehavior behavior = egg.AddComponent<EggBehavior>();
+             behavior.geoPosition = geoPos;
+             behavior.map = map;
+             behavior.player = player;*/
+
+            EggBehavior behavior = egg.GetComponent<EggBehavior>();
             behavior.geoPosition = geoPos;
             behavior.map = map;
             behavior.player = player;
+
 
             // Get world position
             Vector3 worldPos = map.GeoToWorldPosition(geoPos, true);
