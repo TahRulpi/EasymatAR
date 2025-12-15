@@ -48,13 +48,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: c1e2a5ed45ca695448fb5a720f2a6e24, type: 2}
     - target: {fileID: 919132149155446097, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
       propertyPath: m_Name
-      value: egg
+      value: gold
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
       propertyPath: m_TagString
-      value: Egg
+      value: Gold
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -134,5 +138,13 @@ MonoBehaviour:
   geoPosition:
     x: 0
     y: 0
+  arDistance: 5
   visibleDistance: 50
   glowDistance: 15
+  eggType: 0
+  gpsPosition:
+    x: 0
+    y: 0
+  isCollectable: 1
+  isVisibleOnMap: 0
+  isCollected: 0

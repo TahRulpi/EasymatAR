@@ -11,7 +11,7 @@ public class EggSpawner : MonoBehaviour
 
     public Transform player; // AR Camera
 
-    /*void Start()
+    void Start()
     {
         if (map == null)
         {
@@ -27,16 +27,16 @@ public class EggSpawner : MonoBehaviour
         map.OnInitialized += SpawnEggs;
         SpawnEggs();
 
-        *//*#if UNITY_EDITOR
-                // For testing in the Editor without a device, call it directly
-                SpawnEggs();
-        #endif*//*
+#if UNITY_EDITOR
+        // For testing in the Editor without a device, call it directly
+        SpawnEggs();
+#endif
 
         // Subscribe to Mapbox initialization event
         // map.OnInitialized += SpawnEggs;
-    }*/
+    }
 
-    void Start()
+    /*void Start()
     {
         if (map == null)
         {
@@ -48,7 +48,7 @@ public class EggSpawner : MonoBehaviour
         map.OnInitialized += SpawnEggs;
 
 
-    }
+    }*/
 
 
     void SpawnEggs()

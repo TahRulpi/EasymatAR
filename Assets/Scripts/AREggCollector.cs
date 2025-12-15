@@ -79,7 +79,7 @@ public class AREggCollector : MonoBehaviour
     void CollectEgg(GameObject egg)
     {
         Debug.Log("?? Egg Collected!");
-        GameManager.Instance.AddScore(1);
+        //GameManager.Instance.AddScore(1);
         Destroy(egg);
     }
 }
