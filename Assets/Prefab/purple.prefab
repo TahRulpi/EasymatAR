@@ -58,7 +58,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
       propertyPath: m_TagString
-      value: Purple
+      value: Egg
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -140,8 +140,7 @@ MonoBehaviour:
     y: 0
   arDistance: 5
   visibleDistance: 50
-  glowDistance: 15
-  eggType: 0
+  eggType: 2
   gpsPosition:
     x: 0
     y: 0

@@ -1,98 +1,66 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mapbox.Unity.Map;
 using Mapbox.Utils;
+using System;
 
 public class EggSpawner : MonoBehaviour
 {
     public AbstractMap map;
     public GameObject eggPrefab;
-    public List<Vector2d> eggLocations;//EggSpawner loads real-world GPS coordinates
+    public List<Vector2d> eggLocations;
+    public Transform player;
 
-    public Transform player; // AR Camera
+    private bool spawned = false;
 
     void Start()
     {
         if (map == null)
         {
-            Debug.LogError("Map is null! Assign it in the Inspector.");
+            Debug.LogError("? Map is NULL! Assign it in Inspector.");
             return;
         }
-        else
-        {
-            Debug.Log("Map assigned, waiting for OnInitialized...");
-        }
 
-        // Subscribe to Mapbox initialization
-        map.OnInitialized += SpawnEggs;
-        SpawnEggs();
-
-#if UNITY_EDITOR
-        // For testing in the Editor without a device, call it directly
-        SpawnEggs();
-#endif
-
-        // Subscribe to Mapbox initialization event
-        // map.OnInitialized += SpawnEggs;
+        StartCoroutine(WaitForMapAndSpawn());
     }
 
-    /*void Start()
+    IEnumerator WaitForMapAndSpawn()
     {
-        if (map == null)
+        Debug.Log("? Waiting for Mapbox map to initialize...");
+
+        // Wait until map has a center and scale
+        while (map.CenterLatitudeLongitude == Vector2d.zero || map.WorldRelativeScale <= 0)
         {
-            Debug.LogError("Map is null!");
-            return;
+            yield return null;
         }
 
-        Debug.Log("Map assigned, waiting for OnInitialized...");
-        map.OnInitialized += SpawnEggs;
+        if (spawned) yield break;
+        spawned = true;
 
-
-    }*/
-
+        Debug.Log("?? Map ready — spawning eggs");
+        SpawnEggs();
+    }
 
     void SpawnEggs()
     {
-        Debug.Log("?? Map initialized — spawning eggs...");
+        Debug.Log("?? SpawnEggs() CALLED");
 
         foreach (Vector2d geoPos in eggLocations)
         {
             GameObject egg = Instantiate(eggPrefab);
-            egg.SetActive(true);
-
-            /* EggBehavior behavior = egg.AddComponent<EggBehavior>();
-             behavior.geoPosition = geoPos;
-             behavior.map = map;
-             behavior.player = player;*/
+            Debug.Log("?? Egg instantiated");
 
             EggBehavior behavior = egg.GetComponent<EggBehavior>();
             behavior.geoPosition = geoPos;
             behavior.map = map;
             behavior.player = player;
+            behavior.spawnTime = DateTime.Now;
 
-
-            // Get world position
             Vector3 worldPos = map.GeoToWorldPosition(geoPos, true);
+            egg.transform.position = worldPos;
 
-            // Debug confirmations
-            Debug.Log("?? EGG SPAWNED!");
-            Debug.Log($"?? GPS Provided: lat={geoPos.x}, lon={geoPos.y}");
-            Debug.Log($"??? Mapbox World Position: {worldPos}");
-
-            // Check if accidentally at zero
-            if (worldPos == Vector3.zero)
-            {
-                Debug.LogError("?? WARNING: Egg world position is (0,0,0). GPS or Mapbox may be wrong.");
-            }
-            else
-            {
-                Debug.Log("? Egg world position is NOT at zero. Conversion OK.");
-            }
-            Debug.Log("EGG SPAWNED at GPS: " + geoPos);
+            Debug.Log("?? Egg world pos: " + worldPos);
         }
-        
-
-
     }
-
 }

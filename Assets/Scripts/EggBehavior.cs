@@ -8,7 +8,7 @@ public class EggBehavior : MonoBehaviour
     [Header("Mapbox")]
     public AbstractMap map;
     public Transform player;
-   
+
     public DateTime spawnTime; // Set this when spawning eggs
 
 
@@ -21,7 +21,7 @@ public class EggBehavior : MonoBehaviour
 
     [Header("Distance Settings")]
     public float visibleDistance = 50f; // meters
-  //  public float glowDistance = 15f;    // meters
+                                        //  public float glowDistance = 15f;    // meters
 
     private Renderer eggRenderer;
     private Material eggMaterial;
@@ -31,8 +31,8 @@ public class EggBehavior : MonoBehaviour
     public Vector2d gpsPosition;
     public bool isCollectable = true;
 
-    
-    
+
+
 
     // runtime states
     [HideInInspector] public bool isVisibleOnMap;
@@ -44,104 +44,67 @@ public class EggBehavior : MonoBehaviour
 
         // Start with glow OFF
         eggMaterial.DisableKeyword("_EMISSION");
-        gameObject.SetActive(false);
+        // gameObject.SetActive(false);
     }
 
     void Update()
     {
 
+        if (player == null || map == null)
+            return;
+
+        // ?? Subscription visibility
         if (!CanSeeEgg())
         {
-            gameObject.SetActive(false); // Hide egg if not visible for current tier
+            if (gameObject.activeSelf)
+                gameObject.SetActive(false);
             return;
         }
 
-        gameObject.SetActive(true); // Make sure it’s visible if allowed
-
-
-        if (player == null || map == null) return;
-
+        // ?? Map position update
         Vector3 worldPos = map.GeoToWorldPosition(geoPosition, true);
         transform.position = worldPos;
 
         float distance = Vector3.Distance(player.position, worldPos);
 
-        // 1?? Visibility control
-        if (distance <= visibleDistance)
-        {
-            if (!gameObject.activeSelf)
-                gameObject.SetActive(true);
-        }
-        else
-        {
-            if (gameObject.activeSelf)
-                gameObject.SetActive(false);
+        // ??? Distance-based visibility
+        bool shouldBeVisible = distance <= visibleDistance;
 
-          //  DisableGlow();
-            return;
-        }
-
-        // 2?? Glow control
-        /*if (distance <= glowDistance)
-        {
-            EnableGlow();
-        }
-        else
-        {
-            DisableGlow();
-        }
-
-        if (distance <= arDistance)
-        {
-            // Egg can be collected in AR
-            gameObject.layer = LayerMask.NameToLayer("Default");
-        }
-        else
-        {
-            DisableGlow();
-        }*/
+        if (gameObject.activeSelf != shouldBeVisible)
+            gameObject.SetActive(shouldBeVisible);
 
     }
 
-    void EnableGlow()
-    {
-        if (isGlowing) return;
 
-        eggMaterial.EnableKeyword("_EMISSION");
-        eggMaterial.SetColor("_EmissionColor", Color.yellow * 2f);
-        isGlowing = true;
-    }
-
-    void DisableGlow()
-    {
-        if (!isGlowing) return;
-
-        eggMaterial.SetColor("_EmissionColor", Color.black);
-        eggMaterial.DisableKeyword("_EMISSION");
-        isGlowing = false;
-    }
     private bool CanSeeEgg()
     {
         SubscriptionTier tier = GameManager.Instance.currentTier;
+        Debug.Log($"EGG {eggType} | Tier: {GameManager.Instance.currentTier} | Spawn: {spawnTime}");
+        // ? Normal spawn check
+        if (tier != SubscriptionTier.Premium)
+        {
+            if (DateTime.Now < spawnTime)
+                return false;
+        }
 
         switch (tier)
         {
             case SubscriptionTier.None:
-                // Normal users only see Red and Green
                 return eggType == EggType.Red || eggType == EggType.Green;
 
             case SubscriptionTier.Pro:
-                // Pro sees all eggs, but no early access
                 return true;
 
             case SubscriptionTier.Premium:
-                // Premium sees all eggs + early access (spawn 30 min earlier)
-                DateTime premiumVisibleTime = spawnTime.AddMinutes(-30);
-                return DateTime.Now >= premiumVisibleTime;
+                DateTime premiumTime = spawnTime.AddMinutes(-30);
+                return DateTime.Now >= premiumTime;
 
             default:
                 return false;
         }
-    }
 
+       
+
+
+    }
 }
