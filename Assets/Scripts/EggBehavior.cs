@@ -9,8 +9,7 @@ public class EggBehavior : MonoBehaviour
     public AbstractMap map;
     public Transform player;
 
-    public DateTime spawnTime; // Set this when spawning eggs
-
+    public DateTime spawnTime;
 
     [Header("Egg GPS Position")]
     public Vector2d geoPosition;
@@ -18,25 +17,18 @@ public class EggBehavior : MonoBehaviour
     [Header("AR Settings")]
     public float arDistance = 5f;
 
-
     [Header("Distance Settings")]
-    public float visibleDistance = 50f; // meters
-                                        //  public float glowDistance = 15f;    // meters
+    public float visibleDistance = 50f;
 
     private Renderer eggRenderer;
     private Material eggMaterial;
-    private bool isGlowing = false;
+
     [Header("Egg Info")]
     public EggType eggType;
-    public Vector2d gpsPosition;
     public bool isCollectable = true;
 
-
-
-
-    // runtime states
-    [HideInInspector] public bool isVisibleOnMap;
     [HideInInspector] public bool isCollected;
+
     void Start()
     {
         eggRenderer = GetComponentInChildren<Renderer>();
@@ -44,67 +36,41 @@ public class EggBehavior : MonoBehaviour
 
         // Start with glow OFF
         eggMaterial.DisableKeyword("_EMISSION");
-        // gameObject.SetActive(false);
+
+        // Force visible on map
+        gameObject.SetActive(true);
     }
 
     void Update()
     {
-
         if (player == null || map == null)
             return;
 
-        // ?? Subscription visibility
-        if (!CanSeeEgg())
-        {
-            if (gameObject.activeSelf)
-                gameObject.SetActive(false);
-            return;
-        }
-
-        // ?? Map position update
+        // Update egg position on map
         Vector3 worldPos = map.GeoToWorldPosition(geoPosition, true);
+        worldPos.y += 0.5f; // optional: above map
         transform.position = worldPos;
 
-        float distance = Vector3.Distance(player.position, worldPos);
-
-        // ??? Distance-based visibility
-        bool shouldBeVisible = distance <= visibleDistance;
-
-        if (gameObject.activeSelf != shouldBeVisible)
-            gameObject.SetActive(shouldBeVisible);
-
+        // Optionally, hide if very far from player
+        // Comment out if you want always visible
+        //float distance = Vector3.Distance(player.position, worldPos);
+        //gameObject.SetActive(distance <= visibleDistance);
     }
 
-
-    private bool CanSeeEgg()
+    // Optional: CanSeeEgg logic simplified
+    public bool CanSeeEgg()
     {
         SubscriptionTier tier = GameManager.Instance.currentTier;
-        Debug.Log($"EGG {eggType} | Tier: {GameManager.Instance.currentTier} | Spawn: {spawnTime}");
-        // ? Normal spawn check
-        if (tier != SubscriptionTier.Premium)
-        {
-            if (DateTime.Now < spawnTime)
-                return false;
-        }
-
         switch (tier)
         {
             case SubscriptionTier.None:
                 return eggType == EggType.Red || eggType == EggType.Green;
-
             case SubscriptionTier.Pro:
                 return true;
-
             case SubscriptionTier.Premium:
-                DateTime premiumTime = spawnTime.AddMinutes(-30);
-                return DateTime.Now >= premiumTime;
-
+                return true;
             default:
                 return false;
         }
-
-       
-
-
     }
 }
