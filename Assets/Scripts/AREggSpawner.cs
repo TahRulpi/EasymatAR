@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 
 public class AREggSpawner : MonoBehaviour
 {
@@ -43,5 +43,50 @@ public class AREggSpawner : MonoBehaviour
         if (tier == SubscriptionTier.Pro) return type == EggType.Green; // example: only 1 collectable
         if (tier == SubscriptionTier.Premium) return true; // all collectable
         return false;
+    }
+}
+*/
+
+
+using UnityEngine;
+
+public class AREggSpawner : MonoBehaviour
+{
+    public GameObject redEggPrefab;
+    public GameObject greenEggPrefab;
+    public GameObject purpleEggPrefab;
+    public GameObject goldenEggPrefab;
+
+    void Start()
+    {
+        EggType type = (EggType)PlayerPrefs.GetInt("SCAN_EGG_TYPE", 0);
+
+        GameObject prefab = GetPrefabByType(type);
+
+        Camera cam = Camera.main;
+
+        // Spawn 1.5 meters in front of camera
+        Vector3 spawnPos = cam.transform.position + cam.transform.forward * 1.5f;
+
+        GameObject egg = Instantiate(prefab, spawnPos, Quaternion.identity);
+
+        egg.tag = "Egg";
+
+        EggBehavior behavior = egg.GetComponent<EggBehavior>();
+        behavior.eggType = type;
+
+        Debug.Log("?? Egg spawned in AR");
+    }
+
+    GameObject GetPrefabByType(EggType type)
+    {
+        switch (type)
+        {
+            case EggType.Red: return redEggPrefab;
+            case EggType.Green: return greenEggPrefab;
+            case EggType.Purple: return purpleEggPrefab;
+            case EggType.Golden: return goldenEggPrefab;
+            default: return redEggPrefab;
+        }
     }
 }
