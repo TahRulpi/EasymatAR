@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 
 public class EggMapManager : MonoBehaviour
 {
@@ -13,7 +13,7 @@ public class EggMapManager : MonoBehaviour
             (float)LocationManager.Instance.latitude,
             (float)LocationManager.Instance.longitude);
 
-        /*foreach (var egg in eggs)
+        *//*foreach (var egg in eggs)
         {
             Vector2 eggPos = GPSToUnity.GPSDistance(
                 playerPos.x, playerPos.y,
@@ -28,6 +28,31 @@ public class EggMapManager : MonoBehaviour
             }
 
             marker.GetComponent<RectTransform>().anchoredPosition = eggPos;
-        }*/
+        }*//*
+    }
+}
+*/
+
+using System.Collections.Generic;
+using UnityEngine;
+using static EggSpawner;
+
+public class EggManager : MonoBehaviour
+{
+    public static EggManager Instance;
+
+    [HideInInspector] public List<EggData> eggsToSpawn = new List<EggData>();
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // persist across scenes
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }

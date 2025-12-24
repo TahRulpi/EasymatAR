@@ -9,6 +9,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0
       objectReference: {fileID: 0}
@@ -54,7 +66,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 28e12e2ca16dca745bd7f2d052a3d83a, type: 2}
     - target: {fileID: 919132149155446097, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
       propertyPath: m_Name
-      value: purple 1
+      value: green
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
       propertyPath: m_TagString
@@ -70,6 +82,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9121181072753780460}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3563355262799068817}
   m_SourcePrefab: {fileID: 100100000, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
 --- !u!1 &6274429174920703670 stripped
 GameObject:
@@ -106,7 +121,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_UsedByComposite: 0
   m_Offset: {x: 9.313226e-10, y: -0.00007275771}
   m_SpriteTilingProperty:
@@ -141,9 +156,17 @@ MonoBehaviour:
   arDistance: 5
   visibleDistance: 50
   eggType: 2
-  gpsPosition:
-    x: 0
-    y: 0
   isCollectable: 1
-  isVisibleOnMap: 0
   isCollected: 0
+--- !u!114 &3563355262799068817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6274429174920703670}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe4da545d87820344a0aec52a15e5741, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

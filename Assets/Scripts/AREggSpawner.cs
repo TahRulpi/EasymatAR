@@ -1,28 +1,83 @@
-/*using UnityEngine;
+/*using Mapbox.Unity.Map;
+using Mapbox.Utils;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.XR.ARFoundation;
 
 public class AREggSpawner : MonoBehaviour
 {
+    public float eggScale = 0.3f;
+    public bool spawnDebugCube = true;
+
     public GameObject redEggPrefab;
     public GameObject greenEggPrefab;
     public GameObject purpleEggPrefab;
     public GameObject goldenEggPrefab;
 
+    public AbstractMap map;
+    public List<EggBehavior> mapEggs;
+
+    private bool eggSpawned = false;
+
     void Start()
     {
-        float lat = float.Parse(PlayerPrefs.GetString("SCAN_EGG_LAT"));
-        float lon = float.Parse(PlayerPrefs.GetString("SCAN_EGG_LON"));
-        EggType type = (EggType)PlayerPrefs.GetInt("SCAN_EGG_TYPE");
+        StartCoroutine(SpawnWhenReady());
+    }
 
-        GameObject prefabToUse = GetPrefabByType(type);
+    IEnumerator SpawnWhenReady()
+    {
+#if UNITY_EDITOR
+        yield return new WaitForSeconds(1f); // Editor test
+#else
+        while (ARSession.state != ARSessionState.SessionTracking)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+        yield return new WaitForSeconds(0.5f);
+#endif
 
-        Vector3 spawnPos = Camera.main.transform.position + Camera.main.transform.forward * 1.5f;
+        if (!eggSpawned)
+        {
+            SpawnEggsInAR();
+            eggSpawned = true;
+        }
+    }
 
-        GameObject egg = Instantiate(prefabToUse, spawnPos, Quaternion.identity);
-        egg.GetComponent<EggBehavior>().eggType = type;
+    void SpawnEggsInAR()
+    {
+        Camera cam = Camera.main;
+        foreach (var mapEgg in mapEggs)
+        {
+            Vector3 worldPos = map.GeoToWorldPosition(mapEgg.geoPosition, true);
 
-        // Decide collectable based on subscription tier
-        SubscriptionTier tier = (SubscriptionTier)PlayerPrefs.GetInt("USER_TIER", 0);
-        egg.GetComponent<EggBehavior>().isCollectable = ShouldBeCollectable(type, tier);
+            GameObject prefab = GetPrefabByType(mapEgg.eggType);
+            GameObject egg = Instantiate(prefab, worldPos, Quaternion.identity);
+            egg.transform.localScale = Vector3.one * eggScale;
+            egg.transform.SetParent(null);
+            egg.transform.LookAt(cam.transform.position);
+            egg.transform.Rotate(0, 180f, 0);
+
+            egg.tag = "Egg";
+
+            EggBehavior behavior = egg.GetComponent<EggBehavior>();
+            if (behavior != null)
+            {
+                behavior.geoPosition = mapEgg.geoPosition;
+                behavior.map = map;
+                behavior.player = cam.transform;
+                behavior.eggType = mapEgg.eggType;
+                behavior.isCollectable = mapEgg.isCollectable;
+            }
+
+            if (spawnDebugCube)
+            {
+                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.transform.position = worldPos;
+                cube.transform.localScale = Vector3.one * 0.2f;
+                cube.GetComponent<Renderer>().material.color = Color.green;
+            }
+        }
     }
 
     GameObject GetPrefabByType(EggType type)
@@ -36,46 +91,97 @@ public class AREggSpawner : MonoBehaviour
             default: return redEggPrefab;
         }
     }
-
-    bool ShouldBeCollectable(EggType type, SubscriptionTier tier)
-    {
-        if (tier == SubscriptionTier.None) return type == EggType.Red; // only 1 collectable
-        if (tier == SubscriptionTier.Pro) return type == EggType.Green; // example: only 1 collectable
-        if (tier == SubscriptionTier.Premium) return true; // all collectable
-        return false;
-    }
 }
 */
 
 
+
+using Mapbox.Unity.Map;
+using Mapbox.Utils;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.ARFoundation;
+using static EggSpawner;
 
 public class AREggSpawner : MonoBehaviour
 {
+    public float eggScale = 0.3f;
+    public bool spawnDebugCube = true;
+
     public GameObject redEggPrefab;
     public GameObject greenEggPrefab;
     public GameObject purpleEggPrefab;
     public GameObject goldenEggPrefab;
 
+    public AbstractMap map;
+
+    private bool eggSpawned = false;
+
     void Start()
     {
-        EggType type = (EggType)PlayerPrefs.GetInt("SCAN_EGG_TYPE", 0);
+        StartCoroutine(SpawnWhenReady());
+    }
 
-        GameObject prefab = GetPrefabByType(type);
+    IEnumerator SpawnWhenReady()
+    {
+#if UNITY_EDITOR
+        yield return new WaitForSeconds(1f); // Editor test
+#else
+        while (ARSession.state != ARSessionState.SessionTracking)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+        yield return new WaitForSeconds(0.5f);
+#endif
+
+        if (!eggSpawned)
+        {
+            SpawnEggsInAR();
+            eggSpawned = true;
+        }
+    }
+
+    void SpawnEggsInAR()
+    {
+        if (EggManager.Instance == null || EggManager.Instance.eggsToSpawn.Count == 0)
+        {
+            Debug.LogWarning("No eggs found in EggManager!");
+            return;
+        }
 
         Camera cam = Camera.main;
 
-        // Spawn 1.5 meters in front of camera
-        Vector3 spawnPos = cam.transform.position + cam.transform.forward * 1.5f;
+        foreach (EggData data in EggManager.Instance.eggsToSpawn)
+        {
+            Vector3 worldPos = map.GeoToWorldPosition(new Vector2d(data.latitude, data.longitude), true);
 
-        GameObject egg = Instantiate(prefab, spawnPos, Quaternion.identity);
+            GameObject prefab = GetPrefabByType(data.eggType);
+            GameObject egg = Instantiate(prefab, worldPos, Quaternion.identity);
+            egg.transform.localScale = Vector3.one * eggScale;
+            egg.transform.SetParent(null);
+            egg.transform.LookAt(cam.transform.position);
+            egg.transform.Rotate(0, 180f, 0);
+            egg.tag = "Egg";
 
-        egg.tag = "Egg";
+            EggBehavior behavior = egg.GetComponent<EggBehavior>();
+            if (behavior != null)
+            {
+                behavior.geoPosition = new Vector2d(data.latitude, data.longitude);
+                behavior.map = map;
+                behavior.player = cam.transform;
+                behavior.eggType = data.eggType;
+                behavior.isCollectable = true; // Or set based on subscription if needed
+            }
 
-        EggBehavior behavior = egg.GetComponent<EggBehavior>();
-        behavior.eggType = type;
-
-        Debug.Log("?? Egg spawned in AR");
+            if (spawnDebugCube)
+            {
+                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.transform.position = worldPos;
+                cube.transform.localScale = Vector3.one * 0.2f;
+                cube.GetComponent<Renderer>().material.color = Color.green;
+            }
+        }
     }
 
     GameObject GetPrefabByType(EggType type)
