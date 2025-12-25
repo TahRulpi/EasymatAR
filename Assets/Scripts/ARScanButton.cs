@@ -8,45 +8,23 @@ public class ARScanButton : MonoBehaviour
 
     public void OnGoARButtonPressed()
     {
+        Debug.Log("AR Button Pressed!");
 
+        if (EggManager.Instance == null)
+        {
+            Debug.LogError("EggManager.Instance is NULL!");
+            return;
+        }
 
-        Debug.Log("AR Button Pressed!"); // Mobile debug
         if (mapEggSpawner == null)
         {
             Debug.LogError("Map EggSpawner reference missing!");
             return;
         }
 
-        EggManager.Instance.eggsToSpawn.Clear();
-
-        foreach (EggBehavior egg in mapEggSpawner.spawnedEggs)
+        if (mapEggSpawner.spawnedEggs == null || mapEggSpawner.spawnedEggs.Count == 0)
         {
-            EggData data = new EggData()
-            {
-                eggType = egg.eggType,
-                latitude = egg.geoPosition.x,
-                longitude = egg.geoPosition.y
-            };
-            EggManager.Instance.eggsToSpawn.Add(data);
-        }
-
-        Debug.Log("Loading AR Scene");
-        SceneManager.LoadScene("ARScene");
-        /*if (EggManager.Instance == null)
-        {
-            Debug.LogError("? EggManager not found in scene!");
-            return;
-        }
-
-        if (mapEggSpawner == null)
-        {
-            Debug.LogError("? Map EggSpawner not assigned!");
-            return;
-        }
-
-        if (mapEggSpawner.spawnedEggs.Count == 0)
-        {
-            Debug.LogError("? No eggs spawned on map!");
+            Debug.LogError("No eggs found to send to AR!");
             return;
         }
 
@@ -66,7 +44,7 @@ public class ARScanButton : MonoBehaviour
             EggManager.Instance.eggsToSpawn.Add(data);
         }
 
-        Debug.Log("? Eggs sent to AR Scene: " + EggManager.Instance.eggsToSpawn.Count);
-        SceneManager.LoadScene("ARScene");*/
+        Debug.Log("Eggs sent to AR: " + EggManager.Instance.eggsToSpawn.Count);
+        SceneManager.LoadScene("ARScene");
     }
 }

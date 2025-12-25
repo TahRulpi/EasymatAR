@@ -7,10 +7,12 @@ using Mapbox.Utils;
 
 public class EggSpawner : MonoBehaviour
 {
+    [Header("AR Ready List (DO NOT TOUCH AT RUNTIME)")]
+    public List<EggBehavior> spawnedEggs = new List<EggBehavior>();
+
     [Header("Map Settings")]
     public AbstractMap map;
     public Transform player;
-
 
     [System.Serializable]
     public class EggData
@@ -26,11 +28,8 @@ public class EggSpawner : MonoBehaviour
     public GameObject purpleEggPrefab;
     public GameObject goldenEggPrefab;
 
-    [Header("Egg Input Settings")]
-    public List<EggData> eggInputList = new List<EggData>(); // Set this in Inspector or via code
-
-    [Header("AR Ready List")]
-    public List<EggBehavior> spawnedEggs = new List<EggBehavior>(); // For AR spawning
+    [Header("Egg Input List (GPS based)")]
+    public List<EggData> eggInputList = new List<EggData>();
 
     private bool spawned = false;
 
@@ -38,7 +37,7 @@ public class EggSpawner : MonoBehaviour
     {
         if (map == null)
         {
-            Debug.LogError("? Map is NULL! Assign it in Inspector.");
+            Debug.LogError("? Map is NULL! Assign AbstractMap in Inspector.");
             return;
         }
 
@@ -47,7 +46,7 @@ public class EggSpawner : MonoBehaviour
 
     IEnumerator WaitForMapAndSpawn()
     {
-        Debug.Log("? Waiting for Mapbox map to initialize...");
+        Debug.Log("?? Waiting for Mapbox map to initialize...");
 
         while (map.CenterLatitudeLongitude == Vector2d.zero || map.WorldRelativeScale <= 0)
         {
@@ -65,34 +64,47 @@ public class EggSpawner : MonoBehaviour
     {
         if (eggInputList == null || eggInputList.Count == 0)
         {
-            Debug.LogWarning("? No egg input provided!");
+            Debug.LogWarning("?? No egg input provided!");
             return;
         }
+
+        spawnedEggs.Clear(); // VERY IMPORTANT
 
         foreach (EggData data in eggInputList)
         {
             GameObject prefab = GetPrefabByType(data.eggType);
-            if (prefab == null) continue;
+            if (prefab == null)
+            {
+                Debug.LogWarning("? Missing prefab for egg type: " + data.eggType);
+                continue;
+            }
 
-            GameObject egg = Instantiate(prefab);
+            Vector2d gpsPos = new Vector2d(data.latitude, data.longitude);
+            Vector3 worldPos = map.GeoToWorldPosition(gpsPos, true);
+
+            GameObject egg = Instantiate(prefab, worldPos, Quaternion.identity);
             egg.SetActive(true);
 
             EggBehavior behavior = egg.GetComponent<EggBehavior>();
-            if (behavior != null)
+            if (behavior == null)
             {
-                behavior.geoPosition = new Vector2d(data.latitude, data.longitude);
-                behavior.map = map;
-                behavior.player = player;
-                behavior.spawnTime = DateTime.Now;
-                behavior.eggType = data.eggType;
-                behavior.isCollectable = true; // or use subscription logic if you want
-                spawnedEggs.Add(behavior);
+                Debug.LogError("? Egg prefab missing EggBehavior component!");
+                Destroy(egg);
+                continue;
             }
 
-            Vector3 worldPos = map.GeoToWorldPosition(new Vector2d(data.latitude, data.longitude), true);
-            egg.transform.position = worldPos;
+            // ?? Bind data
+            behavior.geoPosition = gpsPos;
+            behavior.map = map;
+            behavior.player = player;
+            behavior.spawnTime = DateTime.Now;
+            behavior.eggType = data.eggType;
+            behavior.isCollectable = true;
 
-            Debug.Log($"?? Egg spawned: {data.eggType} at {worldPos}");
+            // ? REGISTER FOR AR
+            spawnedEggs.Add(behavior);
+
+            Debug.Log($"?? Egg registered for AR: {data.eggType} @ {gpsPos}");
         }
     }
 
