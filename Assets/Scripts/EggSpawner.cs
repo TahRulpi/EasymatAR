@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mapbox.Unity.Map;
+using Mapbox.Unity.Location;
 using Mapbox.Utils;
 
 public class EggSpawner : MonoBehaviour
 {
-    [Header("AR Ready List (DO NOT TOUCH AT RUNTIME)")]
+    [Header("AR Ready List")]
     public List<EggBehavior> spawnedEggs = new List<EggBehavior>();
 
     [Header("Map Settings")]
@@ -18,8 +19,8 @@ public class EggSpawner : MonoBehaviour
     public class EggData
     {
         public EggType eggType;     // Red, Green, Purple, Golden
-        public double latitude;     // GPS latitude
-        public double longitude;    // GPS longitude
+        public double latitude;
+        public double longitude;
     }
 
     [Header("Egg Prefabs")]
@@ -33,79 +34,103 @@ public class EggSpawner : MonoBehaviour
 
     private bool spawned = false;
 
-    void Start()
+    void Awake()
     {
-        if (map == null)
-        {
-            Debug.LogError("? Map is NULL! Assign AbstractMap in Inspector.");
-            return;
-        }
-
-        StartCoroutine(WaitForMapAndSpawn());
+        Debug.Log("?? EggSpawner AWAKE");
     }
 
-    IEnumerator WaitForMapAndSpawn()
+    IEnumerator Start()
     {
-        Debug.Log("?? Waiting for Mapbox map to initialize...");
+        Debug.Log("?? EggSpawner START (Coroutine)");
 
-        while (map.CenterLatitudeLongitude == Vector2d.zero || map.WorldRelativeScale <= 0)
-        {
+        // Wait for map reference
+        while (map == null)
             yield return null;
-        }
 
-        if (spawned) yield break;
-        spawned = true;
+        // Wait until Mapbox finishes loading tiles
+        while (map.MapVisualizer == null || map.MapVisualizer.ActiveTiles.Count == 0)
+            yield return null;
 
-        Debug.Log("? Map ready — spawning eggs");
+        Debug.Log("?? Map READY ? Spawning eggs");
         SpawnEggs();
     }
 
     void SpawnEggs()
     {
+        if (spawned) return;
+        spawned = true;
+
+        spawnedEggs.Clear();
+
         if (eggInputList == null || eggInputList.Count == 0)
         {
-            Debug.LogWarning("?? No egg input provided!");
+            Debug.LogWarning("? No egg input provided!");
             return;
         }
-
-        spawnedEggs.Clear(); // VERY IMPORTANT
 
         foreach (EggData data in eggInputList)
         {
             GameObject prefab = GetPrefabByType(data.eggType);
-            if (prefab == null)
-            {
-                Debug.LogWarning("? Missing prefab for egg type: " + data.eggType);
-                continue;
-            }
+            if (prefab == null) continue;
 
             Vector2d gpsPos = new Vector2d(data.latitude, data.longitude);
             Vector3 worldPos = map.GeoToWorldPosition(gpsPos, true);
+            worldPos.y += 2f; // Lift above map
 
             GameObject egg = Instantiate(prefab, worldPos, Quaternion.identity);
-            egg.SetActive(true);
+            egg.transform.SetParent(map.transform, true);
+
+            // Start bounce animation
+            StartCoroutine(BounceEgg(egg.transform));
 
             EggBehavior behavior = egg.GetComponent<EggBehavior>();
-            if (behavior == null)
+            if (behavior != null)
             {
-                Debug.LogError("? Egg prefab missing EggBehavior component!");
-                Destroy(egg);
-                continue;
+                behavior.geoPosition = gpsPos;
+                behavior.map = map;
+                behavior.player = player;
+                behavior.spawnTime = DateTime.Now;
+                behavior.eggType = data.eggType;
+                behavior.isCollectable = true;
+
+                spawnedEggs.Add(behavior);
             }
 
-            // ?? Bind data
-            behavior.geoPosition = gpsPos;
-            behavior.map = map;
-            behavior.player = player;
-            behavior.spawnTime = DateTime.Now;
-            behavior.eggType = data.eggType;
-            behavior.isCollectable = true;
-
-            // ? REGISTER FOR AR
-            spawnedEggs.Add(behavior);
-
-            Debug.Log($"?? Egg registered for AR: {data.eggType} @ {gpsPos}");
+            Debug.Log($"Egg spawned: {data.eggType} @ {gpsPos}");
         }
+    }
+
+    IEnumerator BounceEgg(Transform egg)
+    {
+        egg.localScale = Vector3.zero;
+        float duration = 0.5f;
+        float elapsed = 0f;
+        Vector3 targetScale = Vector3.one * 95f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Sin(elapsed / duration * Mathf.PI * 0.5f);
+            egg.localScale = targetScale * t;
+            yield return null;
+        }
+        egg.localScale = targetScale;
+
+        // Small up-and-down bounce
+        Vector3 startPos = egg.position;
+        float bounceHeight = 1f;
+        float bounceSpeed = 2f;
+        for (int i = 0; i < 2; i++)
+        {
+            float upTime = 0f;
+            while (upTime < 0.3f)
+            {
+                upTime += Time.deltaTime * bounceSpeed;
+                egg.position = startPos + Vector3.up * Mathf.Sin(upTime * Mathf.PI) * bounceHeight;
+                yield return null;
+            }
+        }
+        egg.position = startPos;
     }
 
     GameObject GetPrefabByType(EggType type)
