@@ -16,7 +16,7 @@ public class PlayerMarker : MonoBehaviour
 
     IEnumerator Start()
     {
-        if (map == null)
+        /*if (map == null)
         {
             Debug.LogError("? AbstractMap not assigned!");
             yield break;
@@ -53,7 +53,34 @@ public class PlayerMarker : MonoBehaviour
         {
             iconInstance = Instantiate(iconPrefab, transform);
             iconInstance.transform.localPosition = Vector3.zero;
+        }*/
+
+        if (!Input.location.isEnabledByUser)
+        {
+            Debug.LogError("? Location disabled by user");
+            yield break;
         }
+
+        Input.location.Stop();   // ?? RESET GPS
+        yield return new WaitForSeconds(1f);
+
+        Input.location.Start(1f, 1f);
+
+        int maxWait = 30;
+        while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
+        {
+            Debug.Log("? Waiting for valid GPS signal...");
+            yield return new WaitForSeconds(1);
+            maxWait--;
+        }
+
+        if (Input.location.status != LocationServiceStatus.Running)
+        {
+            Debug.LogError("? GPS FAILED TO START");
+            yield break;
+        }
+
+        Debug.Log("? GPS READY");
     }
 
     void Update()

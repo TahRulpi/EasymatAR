@@ -35,20 +35,21 @@ public class EggMapManager : MonoBehaviour
 
 using System.Collections.Generic;
 using UnityEngine;
-using static EggSpawner;
 
 public class EggManager : MonoBehaviour
 {
     public static EggManager Instance;
 
     [HideInInspector] public List<EggData> eggsToSpawn = new List<EggData>();
+    [HideInInspector] public double playerLatitude;
+    [HideInInspector] public double playerLongitude;
 
     void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // persist across scenes
+            DontDestroyOnLoad(gameObject);
         }
         else
         {

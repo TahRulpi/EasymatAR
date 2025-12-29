@@ -1,4 +1,7 @@
-using Mapbox.Unity.Map;
+using Mapbox.Utils;
+using Unity.XR.CoreUtils;
+using Unity.XR.CoreUtils;
+/*using Mapbox.Unity.Map;
 using Mapbox.Utils;
 using System.Collections;
 using System.Collections.Generic;
@@ -87,12 +90,18 @@ public class AREggSpawner : MonoBehaviour
             // OPTION A: Spawn in a circle 2 meters in front of the camera (Best for testing)
             float angle = index * angleStep * Mathf.Deg2Rad;
             Vector3 spawnOffset = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * 2.0f; // 2 meters away
-            Vector3 arPos = cam.transform.position + cam.transform.forward * 2.0f + spawnOffset;
+            //Vector3 arPos = cam.transform.position + cam.transform.forward * 2.0f + spawnOffset;
 
-            /* // OPTION B: Use real GPS (Only works if Mapbox is calibrated)
+
+            Vector3 mapWorldPos = map.GeoToWorldPosition(new Vector2d(data.latitude, data.longitude),true);
+
+            // Convert map space ? AR space
+            Vector3 arPos = arOrigin.transform.TransformPoint(mapWorldPos);
+
+            *//* // OPTION B: Use real GPS (Only works if Mapbox is calibrated)
             Vector3 mapWorldPos = map.GeoToWorldPosition(new Vector2d(data.latitude, data.longitude), true);
             Vector3 arPos = arOrigin.transform.InverseTransformPoint(mapWorldPos); 
-            */
+            *//*
 
             // Instantiate and Scale
             GameObject prefab = GetPrefabByType(data.eggType);
@@ -132,5 +141,95 @@ public class AREggSpawner : MonoBehaviour
             case EggType.Golden: return goldenEggPrefab;
             default: return redEggPrefab;
         }
+    }
+}
+*/
+
+
+
+using System.Collections;
+using UnityEngine;
+using UnityEngine.XR.ARFoundation;
+using Unity.XR.CoreUtils;
+
+public class AREggSpawner : MonoBehaviour
+{
+    public XROrigin arOrigin;
+    public GameObject redEggPrefab;
+    public GameObject greenEggPrefab;
+    public GameObject purpleEggPrefab;
+    public GameObject goldenEggPrefab;
+    public float eggScale = 0.5f;
+
+    private bool spawned = false;
+
+    IEnumerator Start()
+    {
+        // Wait for main camera
+        while (Camera.main == null)
+            yield return null;
+
+        // Wait until ARSession tracking starts
+        while (ARSession.state != ARSessionState.SessionTracking)
+            yield return null;
+
+        yield return new WaitForSeconds(0.2f);
+
+        SpawnEggs();
+    }
+
+    void SpawnEggs()
+    {
+        if (spawned) return;
+        if (EggManager.Instance == null || EggManager.Instance.eggsToSpawn.Count == 0)
+        {
+            Debug.LogError("No eggs to spawn!");
+            return;
+        }
+
+        Camera cam = Camera.main;
+
+        foreach (var data in EggManager.Instance.eggsToSpawn)
+        {
+            Vector3 offset = GpsToARPosition(
+                data.latitude, data.longitude,
+                EggManager.Instance.playerLatitude,
+                EggManager.Instance.playerLongitude
+            );
+
+            Vector3 arPos = arOrigin.transform.position + offset;
+            arPos.y += 0.5f; // raise eggs above floor
+
+            GameObject prefab = GetPrefabByType(data.eggType);
+            GameObject egg = Instantiate(prefab, arPos, Quaternion.identity, arOrigin.transform);
+            egg.transform.localScale = Vector3.one * eggScale;
+            egg.transform.LookAt(cam.transform);
+            egg.transform.Rotate(0, 180f, 0);
+        }
+
+        spawned = true;
+        Debug.Log("Eggs spawned successfully!");
+    }
+
+    Vector3 GpsToARPosition(double eggLat, double eggLon, double playerLat, double playerLon)
+    {
+        const double earthRadius = 6378137;
+        double dLat = (eggLat - playerLat) * Mathf.Deg2Rad;
+        double dLon = (eggLon - playerLon) * Mathf.Deg2Rad;
+        double x = dLon * earthRadius * Mathf.Cos((float)playerLat * Mathf.Deg2Rad);
+        double z = dLat * earthRadius;
+        return new Vector3((float)x, 0, (float)z);
+    }
+
+    GameObject GetPrefabByType(EggType type)
+    {
+        return type switch
+        {
+            EggType.Red => redEggPrefab,
+            EggType.Green => greenEggPrefab,
+            EggType.Purple => purpleEggPrefab,
+            EggType.Golden => goldenEggPrefab,
+            _ => redEggPrefab
+        };
     }
 }

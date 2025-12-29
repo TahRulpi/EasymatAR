@@ -679,13 +679,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fe434caf9380db47a0f4db0a8b23fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eggScale: 0.25
+  arOrigin: {fileID: 1347670628}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
   greenEggPrefab: {fileID: 6274429174920703670, guid: 177edbcc44f3cb740b1c257cbe6646a7, type: 3}
   purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
   goldenEggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
-  map: {fileID: 79038245}
-  arOrigin: {fileID: 1347670628}
+  eggScale: 0.25
 --- !u!28 &1155210420
 Texture2D:
   m_ObjectHideFlags: 0
@@ -751,7 +750,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1263160410
 Transform:
   m_ObjectHideFlags: 0
