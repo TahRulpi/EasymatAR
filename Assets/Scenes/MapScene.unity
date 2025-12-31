@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 102469085}
   - component: {fileID: 102469084}
   - component: {fileID: 102469086}
+  - component: {fileID: 102469087}
   m_Layer: 0
   m_Name: MapZoomController
   m_TagString: Untagged
@@ -184,9 +185,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   map: {fileID: 142677767}
-  zoomSpeed: 0.01
+  playerMarker: {fileID: 1499416710}
+  zoomSpeed: 0.5
   minZoom: 14
   maxZoom: 20
+  rotateMapWithCompass: 1
+  rotatePlayerMarker: 1
+--- !u!114 &102469087
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 102469083}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acdbc50f6bcbe71499595e27345d2de7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  map: {fileID: 142677767}
+  panSpeed: 0.0005
+  minZoom: 14
+  maxZoom: 19
 --- !u!1 &115854374
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,13 +251,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fe434caf9380db47a0f4db0a8b23fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eggScale: 0.5
+  arOrigin: {fileID: 0}
+  statusText: {fileID: 0}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
   greenEggPrefab: {fileID: 6274429174920703670, guid: 177edbcc44f3cb740b1c257cbe6646a7, type: 3}
   purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
   goldenEggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
-  map: {fileID: 0}
-  arOrigin: {fileID: 0}
+  eggScale: 0.5
 --- !u!1 &134224383
 GameObject:
   m_ObjectHideFlags: 0
@@ -249,7 +269,7 @@ GameObject:
   - component: {fileID: 134224384}
   - component: {fileID: 134224386}
   - component: {fileID: 134224385}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -406,7 +426,7 @@ MonoBehaviour:
   _options:
     locationOptions:
       latitudeLongitude: 23.78081, 90.40749
-      zoom: 17
+      zoom: 18.5
     extentOptions:
       extentType: 2
       defaultExtents:
@@ -518,9 +538,9 @@ MonoBehaviour:
         entityPerCoroutine: 20
       vectorSubLayers: []
       locationPrefabList: []
-  _tileProvider: {fileID: 0}
+  _tileProvider: {fileID: 974277940}
   _previewOptions:
-    isPreviewEnabled: 0
+    isPreviewEnabled: 1
 --- !u!4 &142677768
 Transform:
   m_ObjectHideFlags: 0
@@ -531,9 +551,10 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.4142135, y: 1.4142135, z: 1.4142135}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 974277941}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &142677769
@@ -645,6 +666,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eggsToSpawn: []
+  playerLatitude: 0
+  playerLongitude: 0
 --- !u!4 &323909423
 Transform:
   m_ObjectHideFlags: 0
@@ -671,7 +694,7 @@ GameObject:
   - component: {fileID: 449061486}
   - component: {fileID: 449061488}
   - component: {fileID: 449061487}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: MapBg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -888,7 +911,7 @@ GameObject:
   - component: {fileID: 547288008}
   - component: {fileID: 547288007}
   - component: {fileID: 547288006}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -996,7 +1019,7 @@ GameObject:
   - component: {fileID: 559509671}
   - component: {fileID: 559509670}
   - component: {fileID: 559509669}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: MapRadar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1426,11 +1449,6 @@ Texture2D:
     offset: 0
     size: 0
     path: 
---- !u!1 &958959501 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 482934434092103471, guid: de794b2d456c44548b340b56fd23f098, type: 3}
-  m_PrefabInstance: {fileID: 985978280}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -1538,6 +1556,54 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   map: {fileID: 142677767}
   cameraHeight: 20
+--- !u!1 &974277939
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 974277941}
+  - component: {fileID: 974277940}
+  m_Layer: 0
+  m_Name: TileProvider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &974277940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 974277939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15eed3c0528a3498dae4ff8f7b8ae77f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _rangeTileProviderOptions:
+    targetTransform: {fileID: 1850378777}
+    visibleBuffer: 7
+    disposeBuffer: 0
+--- !u!4 &974277941
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 974277939}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 142677768}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &985978280
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1610,7 +1676,7 @@ GameObject:
   - component: {fileID: 1225657891}
   - component: {fileID: 1225657893}
   - component: {fileID: 1225657892}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1806,7 +1872,7 @@ GameObject:
   - component: {fileID: 1424750928}
   - component: {fileID: 1424750927}
   - component: {fileID: 1424750930}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: ARScanButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2114,7 +2180,7 @@ GameObject:
   - component: {fileID: 1499416712}
   - component: {fileID: 1499416711}
   - component: {fileID: 1499416713}
-  m_Layer: 5
+  m_Layer: 2
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2138,7 +2204,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 200}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1499416711
 MonoBehaviour:
@@ -2191,7 +2257,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   map: {fileID: 142677767}
-  iconPrefab: {fileID: 958959501}
+  playerMarker: {fileID: 1499416710}
+  canvas: {fileID: 547288008}
+  zoomSpeed: 0.5
+  minZoom: 14
+  maxZoom: 18
+  useSimulatedGPS: 1
+  simulatedLocation:
+    x: 23.8103
+    y: 90.4125
 --- !u!1 &1599573423
 GameObject:
   m_ObjectHideFlags: 0
@@ -2581,7 +2655,7 @@ GameObject:
   - component: {fileID: 1964300657}
   - component: {fileID: 1964300658}
   - component: {fileID: 1964300659}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: 'EggMarkersParent '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2643,7 +2717,7 @@ GameObject:
   - component: {fileID: 2040394245}
   - component: {fileID: 2040394247}
   - component: {fileID: 2040394246}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: PlayerIcon
   m_TagString: Untagged
   m_Icon: {fileID: 0}

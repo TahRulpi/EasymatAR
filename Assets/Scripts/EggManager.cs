@@ -40,16 +40,17 @@ public class EggManager : MonoBehaviour
 {
     public static EggManager Instance;
 
-    [HideInInspector] public List<EggData> eggsToSpawn = new List<EggData>();
-    [HideInInspector] public double playerLatitude;
-    [HideInInspector] public double playerLongitude;
+    public List<EggData> eggsToSpawn = new List<EggData>();
+    public double playerLatitude;
+    public double playerLongitude;
 
-    void Awake()
+    private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            Debug.Log("EggManager initialized and persistent.");
         }
         else
         {
@@ -57,3 +58,4 @@ public class EggManager : MonoBehaviour
         }
     }
 }
+

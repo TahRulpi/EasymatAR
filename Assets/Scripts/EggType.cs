@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum EggType
+/*public enum EggType
 {
     Red,
     Green,
@@ -24,3 +24,21 @@ public class EggData
         longitude = lon;
     }
 }
+*/
+
+[System.Serializable]
+public class EggData
+{
+    public EggType eggType;
+    public double latitude;
+    public double longitude;
+}
+
+public enum EggType
+{
+    Red,
+    Green,
+    Purple,
+    Golden
+}
+
