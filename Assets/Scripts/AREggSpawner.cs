@@ -201,7 +201,7 @@ public class AREggSpawner : MonoBehaviour
         if (statusText != null) statusText.text = ""; // Clear text after spawning
     }
 
-    void SpawnEggs()
+    /*void SpawnEggs()
     {
         if (spawned) return;
 
@@ -237,8 +237,68 @@ public class AREggSpawner : MonoBehaviour
         }
 
         spawned = true;
-    }
+    }*/
 
+    void SpawnEggs()
+    {
+        if (spawned) return;
+
+        if (EggManager.Instance == null || EggManager.Instance.eggsToSpawn.Count == 0)
+        {
+            if (statusText != null) statusText.text = "Error: No eggs found in Manager!";
+            return;
+        }
+
+        Camera cam = Camera.main;
+        Vector3 startPos = cam.transform.position + cam.transform.forward * 1.5f;
+        float spacing = 0.5f;
+        int index = 0;
+
+        // Get current tier from GameManager
+        SubscriptionTier tier = GameManager.Instance.currentTier;
+
+        foreach (var data in EggManager.Instance.eggsToSpawn)
+        {
+            // --- SUBSCRIPTION CHECK START ---
+            bool canSee = false;
+
+            if (tier == SubscriptionTier.None)
+            {
+                // Only Red and Green are visible for free users
+                if (data.eggType == EggType.Red || data.eggType == EggType.Green)
+                {
+                    canSee = true;
+                }
+            }
+            else
+            {
+                // Pro and Premium can see everything
+                canSee = true;
+            }
+
+            if (!canSee)
+            {
+                Debug.Log($"Skipping {data.eggType} egg due to subscription level.");
+                continue;
+            }
+            // --- SUBSCRIPTION CHECK END ---
+
+            Vector3 arPos = startPos + cam.transform.right * spacing * index;
+            arPos.y = cam.transform.position.y - 0.3f;
+
+            GameObject prefab = GetPrefabByType(data.eggType);
+            GameObject egg = Instantiate(prefab, arPos, Quaternion.identity, arOrigin.transform);
+
+            egg.transform.localScale = Vector3.one * eggScale;
+            egg.transform.LookAt(cam.transform);
+            egg.transform.Rotate(0, 180f, 0);
+
+            Debug.Log($"Egg spawned: {data.eggType} at ARPos {arPos}");
+            index++;
+        }
+
+        spawned = true;
+    }
     GameObject GetPrefabByType(EggType type)
     {
         return type switch

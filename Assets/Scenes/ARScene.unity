@@ -796,7 +796,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1117336651
 Transform:
   m_ObjectHideFlags: 0
@@ -1341,6 +1341,7 @@ GameObject:
   - component: {fileID: 1347670630}
   - component: {fileID: 1347670631}
   - component: {fileID: 1347670632}
+  - component: {fileID: 1347670633}
   m_Layer: 0
   m_Name: AR Session Origin
   m_TagString: Untagged
@@ -1415,12 +1416,32 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1347670627}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 72f34fb5e581d6744bba869b4d953511, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   eggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
+  forcedScale: {x: 0.2, y: 0.2, z: 0.2}
+--- !u!114 &1347670633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1347670627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fe434caf9380db47a0f4db0a8b23fc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  arOrigin: {fileID: 1347670628}
+  statusText: {fileID: 214860843}
+  redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
+  greenEggPrefab: {fileID: 6274429174920703670, guid: 177edbcc44f3cb740b1c257cbe6646a7, type: 3}
+  purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
+  goldenEggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
+  eggScale: 100
 --- !u!1 &1446653673
 GameObject:
   m_ObjectHideFlags: 0

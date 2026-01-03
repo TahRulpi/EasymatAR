@@ -538,9 +538,9 @@ MonoBehaviour:
         entityPerCoroutine: 20
       vectorSubLayers: []
       locationPrefabList: []
-  _tileProvider: {fileID: 1039207514}
+  _tileProvider: {fileID: 0}
   _previewOptions:
-    isPreviewEnabled: 1
+    isPreviewEnabled: 0
 --- !u!4 &142677768
 Transform:
   m_ObjectHideFlags: 0
@@ -553,8 +553,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1039207515}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &142677769
@@ -861,7 +860,7 @@ Transform:
   m_GameObject: {fileID: 510055272}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -66.02227, y: 19.290321, z: 51.08186}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1253,14 +1252,14 @@ MonoBehaviour:
     latitude: 23.78081
     longitude: 90.40749
   - eggType: 1
-    latitude: 23.78082
-    longitude: 90.40748
-  - eggType: 2
-    latitude: 23.78083
-    longitude: 90.40747
-  - eggType: 3
     latitude: 23.78084
     longitude: 90.40746
+  - eggType: 2
+    latitude: 23.78087
+    longitude: 90.40743
+  - eggType: 3
+    latitude: 23.7801
+    longitude: 90.40741
 --- !u!114 &831022669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1617,54 +1616,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: de794b2d456c44548b340b56fd23f098, type: 3}
---- !u!1 &1039207513
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1039207515}
-  - component: {fileID: 1039207514}
-  m_Layer: 0
-  m_Name: TileProvider
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1039207514
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1039207513}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15eed3c0528a3498dae4ff8f7b8ae77f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _rangeTileProviderOptions:
-    targetTransform: {fileID: 1850378777}
-    visibleBuffer: 7
-    disposeBuffer: 0
---- !u!4 &1039207515
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1039207513}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 142677768}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1225657890
 GameObject:
   m_ObjectHideFlags: 0
@@ -2390,7 +2341,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: def021e25faec2e4787d970742ec8903, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentTier: 1
+  currentTier: 2
 --- !u!114 &1754627260
 MonoBehaviour:
   m_ObjectHideFlags: 0
