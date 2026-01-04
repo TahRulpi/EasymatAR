@@ -3,58 +3,51 @@ using UnityEngine.UI;
 using Mapbox.Unity.Map;
 using Mapbox.Utils;
 using System.Collections;
+using TMPro;
 
 public class MapboxGPSController : MonoBehaviour
 {
-    [Header("Mapbox")]
+    [Header("Mapbox References")]
     public AbstractMap map;
+    public Camera mapCamera;
 
-    [Header("Player Marker (UI Image)")]
-    public RectTransform playerMarker; // Fixed at center
+    [Header("Player UI Marker")]
+    public RectTransform playerMarker;
+    public Canvas canvas;
 
     [Header("Zoom Settings")]
-    public float zoomSpeed = 0.2f;
-    public int minZoom = 14;
-    public int maxZoom = 18;
+    public float zoomSpeed = 0.3f;
+    public float minZoom = 14f;
+    public float maxZoom = 18f;
 
     [Header("Rotation Settings")]
-    public bool rotateMapWithCompass = true; // true = map rotates under player
-    public bool rotatePlayerMarker = false;  // true = player icon rotates with heading
+    public float rotationSmoothing = 10f;
 
+    [Header("Compass UI")]
+    public RectTransform compassNeedle;
+
+    [Header("Debug")]
+    public TMP_Text debugText;
+
+    // INTERNAL
     private Vector2d currentGPS;
+    private Vector2d lastUpdatedGPS;
+    private float currentZoomLevel;
     private bool gpsReady = false;
-    private int currentZoom;
 
     void Start()
     {
-        if (!Application.isMobilePlatform)
-        {
-            Debug.LogError("? This script works ONLY on real phone");
-            return;
-        }
+        if (mapCamera == null)
+            mapCamera = Camera.main;
 
-        if (playerMarker != null)
-            playerMarker.GetComponent<Image>().raycastTarget = false;
+        Input.location.Start(5f, 1f);
+        Input.compass.enabled = true;
 
         StartCoroutine(StartLocationService());
     }
 
     IEnumerator StartLocationService()
     {
-
-        Input.compass.enabled = true;
-        Input.gyro.enabled = true; // optional, helps smooth rotation
-
-        if (!Input.location.isEnabledByUser)
-        {
-            Debug.LogError("? GPS not enabled by user");
-            yield break;
-        }
-
-        Input.location.Start(1f, 1f);
-        Input.compass.enabled = true;
-        Input.gyro.enabled = true;
-
         int wait = 20;
         while (Input.location.status == LocationServiceStatus.Initializing && wait > 0)
         {
@@ -64,7 +57,7 @@ public class MapboxGPSController : MonoBehaviour
 
         if (Input.location.status != LocationServiceStatus.Running)
         {
-            Debug.LogError("? GPS failed to start");
+            Debug.LogError("GPS not running");
             yield break;
         }
 
@@ -73,37 +66,69 @@ public class MapboxGPSController : MonoBehaviour
             Input.location.lastData.longitude
         );
 
-        currentZoom = Mathf.RoundToInt(map.Zoom);
-        gpsReady = true;
+        currentZoomLevel = map.Zoom;
+        lastUpdatedGPS = currentGPS;
 
-        map.Initialize(currentGPS, currentZoom);
-        Debug.Log($"?? GPS READY: {currentGPS.x}, {currentGPS.y}");
+        map.Initialize(currentGPS, (int)currentZoomLevel);
+        gpsReady = true;
     }
 
     void Update()
     {
         if (!gpsReady) return;
 
-        UpdateGPSPosition();
+        HandleGPSMovement();
         HandlePinchZoom();
-        HandleMapRotation();
+        HandleRotation();
+        UpdatePlayerMarker();
+        UpdateDebugText();
     }
 
-    void UpdateGPSPosition()
+    // ========================= GPS =========================
+    /*void HandleGPSMovement()
     {
+        if (Input.location.status != LocationServiceStatus.Running) return;
+
+        currentGPS = new Vector2d(
+            Input.location.lastData.latitude,
+            Input.location.lastData.longitude
+        );
+
+        // ~1–2 meters movement threshold
+        if (Vector2d.Distance(currentGPS, lastUpdatedGPS) > 0.00002)
+        {
+            map.UpdateMap(currentGPS, currentZoomLevel);
+            lastUpdatedGPS = currentGPS;
+        }
+    }*/
+
+    void HandleGPSMovement()
+    {
+        if (Input.location.status != LocationServiceStatus.Running) return;
+
+        // Get fresh data
         Vector2d newGPS = new Vector2d(
             Input.location.lastData.latitude,
             Input.location.lastData.longitude
         );
 
-        if (newGPS != currentGPS)
+        // Using a smaller threshold or checking if coordinates changed at all
+        if (newGPS.x != currentGPS.x || newGPS.y != currentGPS.y)
         {
             currentGPS = newGPS;
-            map.UpdateMap(currentGPS, currentZoom);
-            Debug.Log($"?? Map moved to GPS: {currentGPS.x}, {currentGPS.y}");
+
+            // Check distance in meters (approximate) to avoid jitter
+            // 0.00001 is roughly 1.1 meters
+            if (Vector2d.Distance(currentGPS, lastUpdatedGPS) > 0.00001)
+            {
+                // This moves the MAP to center on you
+                map.UpdateMap(currentGPS, currentZoomLevel);
+                lastUpdatedGPS = currentGPS;
+            }
         }
     }
 
+    // ========================= PINCH ZOOM =========================
     void HandlePinchZoom()
     {
         if (Input.touchCount != 2) return;
@@ -111,54 +136,94 @@ public class MapboxGPSController : MonoBehaviour
         Touch t0 = Input.GetTouch(0);
         Touch t1 = Input.GetTouch(1);
 
-        Vector2 t0Prev = t0.position - t0.deltaPosition;
-        Vector2 t1Prev = t1.position - t1.deltaPosition;
+        if (t0.phase != TouchPhase.Moved && t1.phase != TouchPhase.Moved) return;
 
-        float prevDist = (t0Prev - t1Prev).magnitude;
-        float currDist = (t0.position - t1.position).magnitude;
+        float currDist = Vector2.Distance(t0.position, t1.position);
+        float prevDist = Vector2.Distance(
+            t0.position - t0.deltaPosition,
+            t1.position - t1.deltaPosition
+        );
 
         float delta = currDist - prevDist;
 
-        int newZoom = currentZoom + (delta > 0 ? 1 : -1);
-        newZoom = Mathf.Clamp(newZoom, minZoom, maxZoom);
+        // Deadzone
+        if (Mathf.Abs(delta) < 0.5f) return;
 
-        if (newZoom != currentZoom)
+        float pinchAmount = (delta / Screen.width) * zoomSpeed * 50f;
+
+        float newZoom = Mathf.Clamp(
+            currentZoomLevel + pinchAmount,
+            minZoom,
+            maxZoom
+        );
+
+        if (Mathf.Abs(newZoom - currentZoomLevel) > 0.001f)
         {
-            currentZoom = newZoom;
-            map.UpdateMap(currentGPS, currentZoom);
-            Debug.Log("?? Zoom updated: " + currentZoom);
+            currentZoomLevel = newZoom;
+            map.UpdateMap(currentGPS, currentZoomLevel);
         }
     }
 
-    void HandleMapRotation()
+    // ========================= ROTATION =========================
+    void HandleRotation()
     {
+        if (!Input.compass.enabled) return;
 
         float heading = Input.compass.trueHeading;
 
-        // Smooth rotation of the map root
-        map.Root.rotation = Quaternion.Lerp(
-            map.Root.rotation,
-            Quaternion.Euler(0, -heading, 0), // negative because we rotate the map under player
-            Time.deltaTime * 5f // smoothing factor
-        );
-
-        if (!rotateMapWithCompass || map == null || !Input.compass.enabled) return;
-
-       // float heading = Input.compass.trueHeading;
-
-        // Smooth rotation
-        map.Root.rotation = Quaternion.Lerp(
-            map.Root.rotation,
-            Quaternion.Euler(0, -heading, 0),
-            Time.deltaTime * 5f
-        );
-
-        // Optional: rotate player icon
-        if (rotatePlayerMarker && playerMarker != null)
+        if (playerMarker != null)
         {
-            playerMarker.localRotation = Quaternion.Euler(0, 0, heading);
+            Quaternion targetRot = Quaternion.Euler(0, 0, -heading);
+            playerMarker.rotation = Quaternion.Slerp(
+                playerMarker.rotation,
+                targetRot,
+                Time.deltaTime * rotationSmoothing
+            );
         }
 
-        Debug.Log($"?? Map rotated to heading: {heading}");
+        if (compassNeedle != null)
+        {
+            compassNeedle.rotation = Quaternion.Euler(0, 0, heading);
+        }
+    }
+
+    // ========================= PLAYER ICON =========================
+    void UpdatePlayerMarker()
+    {
+        if (playerMarker == null || canvas == null) return;
+
+        // IMPORTANT: If map.UpdateMap is centering the map on your GPS, 
+        // the 'WorldPosition' of your GPS will ALWAYS be (0,0,0).
+        // To see the icon move, we force the icon to the center of the screen 
+        // OR use the relative position.
+
+        // If you want the map to FOLLOW the player:
+        // Just set the icon to the center of the screen once and let the map move.
+
+        // If you want to CALCULATE it anyway:
+        Vector3 worldPos = map.GeoToWorldPosition(currentGPS, true);
+        Vector3 screenPos = mapCamera.WorldToScreenPoint(worldPos);
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvas.transform as RectTransform,
+            screenPos,
+            canvas.worldCamera,
+            out Vector2 localPoint))
+        {
+            playerMarker.anchoredPosition = localPoint;
+        }
+    }
+
+    // ========================= DEBUG =========================
+    void UpdateDebugText()
+    {
+        if (debugText == null) return;
+
+        debugText.text =
+            "GPS: " + Input.location.status + "\n" +
+            "Lat: " + currentGPS.x.ToString("F5") + "\n" +
+            "Lon: " + currentGPS.y.ToString("F5") + "\n" +
+            "Heading: " + Input.compass.trueHeading.ToString("F0") + "°\n" +
+            "Zoom: " + currentZoomLevel.ToString("F2");
     }
 }
