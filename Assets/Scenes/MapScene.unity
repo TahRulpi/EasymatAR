@@ -1032,14 +1032,14 @@ MonoBehaviour:
     latitude: 23.78093
     longitude: 90.40757
   - eggType: 1
-    latitude: 23.78094
-    longitude: 90.40748
+    latitude: 23.78093
+    longitude: 90.40758
   - eggType: 2
-    latitude: 23.78095
-    longitude: 90.40743
+    latitude: 23.78093
+    longitude: 90.40759
   - eggType: 3
-    latitude: 23.7801
-    longitude: 90.40741
+    latitude: 23.78093
+    longitude: 90.4076
 --- !u!28 &957120557
 Texture2D:
   m_ObjectHideFlags: 0
