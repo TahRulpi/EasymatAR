@@ -14,7 +14,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
       propertyPath: m_LocalScale.y
-      value: 80
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7ffd3248c01d7734fab913067077121c, type: 3}
       propertyPath: m_LocalScale.z
@@ -148,5 +148,5 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.0041661016
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 0.0027559323
+  m_Center: {x: -0.00010318346, y: 0, z: 0}
