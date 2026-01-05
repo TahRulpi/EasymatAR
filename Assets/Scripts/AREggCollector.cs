@@ -198,3 +198,93 @@ public class AREggCollector : MonoBehaviour
         totalCollectedThisSession = 0;
     }
 }
+
+
+/*
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class AREggCollector : MonoBehaviour
+{
+    private Camera arCamera;
+    private static int totalCollectedThisSession = 0;
+
+    void Start()
+    {
+        arCamera = Camera.main;
+    }
+
+    void Update()
+    {
+        // ? Use ONLY New Input System
+        if (Touchscreen.current == null) return;
+
+        var touches = Touchscreen.current.touches;
+
+        // ? Ignore pinch / multi-touch (allows map zoom)
+        if (touches.Count > 1)
+            return;
+
+        // ? Single finger tap only
+        if (touches.Count == 1 && touches[0].press.wasPressedThisFrame)
+        {
+            Vector2 touchPosition = touches[0].position.ReadValue();
+            Debug.Log("?? Touch Detected at: " + touchPosition);
+            PerformRaycast(touchPosition);
+        }
+    }
+
+    void PerformRaycast(Vector2 screenPos)
+    {
+        Ray ray = arCamera.ScreenPointToRay(screenPos);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 100f))
+        {
+            if (hit.collider.CompareTag("Egg"))
+            {
+                EggBehavior eggScript = hit.collider.GetComponent<EggBehavior>();
+                if (eggScript != null)
+                {
+                    CheckCollectionEligibility(eggScript);
+                }
+            }
+        }
+    }
+
+    // --- LOGIC UNCHANGED ---
+    void CheckCollectionEligibility(EggBehavior egg)
+    {
+        SubscriptionTier tier = GameManager.Instance.currentTier;
+
+        switch (tier)
+        {
+            case SubscriptionTier.None:
+                if ((egg.eggType == EggType.Red || egg.eggType == EggType.Green) && totalCollectedThisSession < 1)
+                    CollectEgg(egg.gameObject);
+                break;
+
+            case SubscriptionTier.Pro:
+                if (totalCollectedThisSession < 1)
+                    CollectEgg(egg.gameObject);
+                break;
+
+            case SubscriptionTier.Premium:
+                CollectEgg(egg.gameObject);
+                break;
+        }
+    }
+
+    void CollectEgg(GameObject egg)
+    {
+        totalCollectedThisSession++;
+        Debug.Log($"?? Egg Collected! Total: {totalCollectedThisSession}");
+        Destroy(egg);
+    }
+
+    public static void ResetCollectionCount()
+    {
+        totalCollectedThisSession = 0;
+    }
+}
+*/

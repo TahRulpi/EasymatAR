@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 using UnityEngine.UI;
 using Mapbox.Unity.Map;
 using Mapbox.Utils;
@@ -85,7 +85,7 @@ public class MapboxGPSController : MonoBehaviour
     }
 
     // ========================= GPS =========================
-    /*void HandleGPSMovement()
+    *//*void HandleGPSMovement()
     {
         if (Input.location.status != LocationServiceStatus.Running) return;
 
@@ -100,7 +100,7 @@ public class MapboxGPSController : MonoBehaviour
             map.UpdateMap(currentGPS, currentZoomLevel);
             lastUpdatedGPS = currentGPS;
         }
-    }*/
+    }*//*
 
     void HandleGPSMovement()
     {
@@ -225,5 +225,152 @@ public class MapboxGPSController : MonoBehaviour
             "Lon: " + currentGPS.y.ToString("F5") + "\n" +
             "Heading: " + Input.compass.trueHeading.ToString("F0") + "°\n" +
             "Zoom: " + currentZoomLevel.ToString("F2");
+    }
+}
+*/
+
+
+using UnityEngine;
+using Mapbox.Unity.Map;
+using Mapbox.Utils;
+using System.Collections;
+using TMPro;
+
+public class MapboxGPSController : MonoBehaviour
+{
+    [Header("Mapbox")]
+    public AbstractMap map;
+
+    [Header("Player Marker (centered UI)")]
+    public RectTransform playerMarker;
+
+    [Header("Zoom Settings")]
+    public int minZoom = 14;
+    public int maxZoom = 18;
+
+    [Header("GPS Settings")]
+    [Tooltip("~0.00005 ? 5 meters")]
+    public float gpsMoveThreshold = 0.00005f;
+
+    [Header("Debug")]
+    public TMP_Text debugText;
+
+    // INTERNAL
+    private Vector2d currentGPS;
+    private Vector2d lastMapCenterGPS;
+    private int currentZoom;
+    private bool gpsReady = false;
+
+    void Start()
+    {
+        Input.location.Start(5f, 1f);
+        Input.compass.enabled = true;
+
+        StartCoroutine(InitGPS());
+    }
+
+    IEnumerator InitGPS()
+    {
+        int wait = 20;
+        while (Input.location.status == LocationServiceStatus.Initializing && wait > 0)
+        {
+            yield return new WaitForSeconds(1);
+            wait--;
+        }
+
+        if (Input.location.status != LocationServiceStatus.Running)
+        {
+            Debug.LogError("GPS NOT RUNNING");
+            yield break;
+        }
+
+        currentGPS = new Vector2d(
+            Input.location.lastData.latitude,
+            Input.location.lastData.longitude
+        );
+
+        lastMapCenterGPS = currentGPS;
+
+        // ?? FORCE INT (important)
+        currentZoom = (int)map.Zoom;
+
+        map.Initialize(currentGPS, currentZoom);
+        gpsReady = true;
+
+        if (playerMarker != null)
+            playerMarker.anchoredPosition = Vector2.zero;
+    }
+
+    void Update()
+    {
+        if (!gpsReady) return;
+
+        HandleGPSMovement();
+        HandlePinchZoom();
+        UpdateDebug();
+    }
+
+    // ================= GPS =================
+    void HandleGPSMovement()
+    {
+        if (Input.location.status != LocationServiceStatus.Running) return;
+
+        Vector2d newGPS = new Vector2d(
+            Input.location.lastData.latitude,
+            Input.location.lastData.longitude
+        );
+
+        if (Vector2d.Distance(newGPS, lastMapCenterGPS) > gpsMoveThreshold)
+        {
+            currentGPS = newGPS;
+            lastMapCenterGPS = newGPS;
+
+            // ?? FORCE INT
+            map.UpdateMap(currentGPS, (int)currentZoom);
+        }
+    }
+
+    // ================= PINCH ZOOM =================
+    void HandlePinchZoom()
+    {
+        if (Input.touchCount != 2) return;
+
+        Touch t0 = Input.GetTouch(0);
+        Touch t1 = Input.GetTouch(1);
+
+        if (t0.phase != TouchPhase.Moved || t1.phase != TouchPhase.Moved) return;
+
+        float currDist = Vector2.Distance(t0.position, t1.position);
+        float prevDist = Vector2.Distance(
+            t0.position - t0.deltaPosition,
+            t1.position - t1.deltaPosition
+        );
+
+        float delta = currDist - prevDist;
+
+        if (Mathf.Abs(delta) < 2f) return;
+
+        int step = delta > 0 ? 1 : -1;
+
+        // ?? Clamp using FLOAT, then cast to INT
+        currentZoom = (int)Mathf.Clamp(
+            currentZoom + step,
+            minZoom,
+            maxZoom
+        );
+
+        map.UpdateMap(currentGPS, (int)currentZoom);
+    }
+
+    // ================= DEBUG =================
+    void UpdateDebug()
+    {
+        if (debugText == null) return;
+
+        debugText.text =
+            "GPS: " + Input.location.status + "\n" +
+            "Lat: " + currentGPS.x.ToString("F6") + "\n" +
+            "Lon: " + currentGPS.y.ToString("F6") + "\n" +
+            "Zoom: " + currentZoom;
     }
 }
