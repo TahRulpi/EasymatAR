@@ -1,3 +1,11 @@
+using Mapbox.Unity.Map;
+using Mapbox.Unity.Map;
+using Mapbox.Utils;
+using Mapbox.Utils;
+using System.Collections;
+using System.Collections;
+using TMPro;
+using TMPro;
 /*using UnityEngine;
 using Mapbox.Unity.Map;
 using Mapbox.Utils;
@@ -240,7 +248,7 @@ public class MapboxGPSController : MonoBehaviour
 */
 
 
-using UnityEngine;
+/*using UnityEngine;
 using Mapbox.Unity.Map;
 using Mapbox.Utils;
 using System.Collections;
@@ -429,5 +437,283 @@ public class MapboxGPSController : MonoBehaviour
             mapCenterGPS = currentGPS;
             map.UpdateMap(mapCenterGPS, currentZoom);
         }
+    }
+}
+
+
+*/
+using UnityEngine;
+using UnityEngine.Android;
+using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.InputSystem.Utilities;
+using Mapbox.Unity.Map;
+using Mapbox.Utils;
+using TMPro;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
+
+public class MapboxGPSController : MonoBehaviour
+{
+    [Header("Mapbox")]
+    public AbstractMap map;
+
+    [Header("Player UI")]
+    public RectTransform playerMarker;
+    public RectTransform accuracyCircle;
+    public RectTransform compassImage;
+
+    [Header("Debug")]
+    public TMP_Text debugText;
+
+    [Header("Zoom")]
+    public float minZoom = 14f;
+    public float maxZoom = 20f;
+    public float zoomSensitivity = 0.005f;
+
+    [Header("Pan")]
+    public float dragSensitivity = 0.000002f;
+
+    [Header("GPS")]
+    public float gpsMoveThresholdMeters = 2f;
+
+    [Header("Compass")]
+    public float rotationSmoothSpeed = 8f;
+
+    [Header("Accuracy")]
+    public float minAccuracyMeters = 5f;
+    public float maxAccuracyMeters = 50f;
+    public float accuracySmoothSpeed = 6f;
+    public float accuracyPixelsPerMeter = 2.5f;
+
+    // ---------------- PRIVATE ----------------
+
+    private Vector2d lastGPS;
+    private bool gpsReady;
+    private float currentZoom;
+    private float currentRotation;
+    private Vector2 lastTouchPos;
+    private string statusMessage = "Initializing GPS...";
+
+    void OnEnable() => EnhancedTouchSupport.Enable();
+    void OnDisable() => EnhancedTouchSupport.Disable();
+
+    void Start()
+    {
+        currentZoom = (float)map.Zoom;
+        StartCoroutine(StartGPS());
+    }
+
+    void Update()
+    {
+        HandleTouch();
+
+        if (gpsReady)
+        {
+            UpdateMarkerFromGPS();
+            UpdateMarkerRotation();
+            UpdateCompassUI();
+            UpdateAccuracyCircle();
+        }
+
+        UpdateDebugUI();
+    }
+
+    // ================= GPS =================
+
+    System.Collections.IEnumerator StartGPS()
+    {
+#if UNITY_ANDROID
+        if (!Permission.HasUserAuthorizedPermission(Permission.FineLocation))
+        {
+            statusMessage = "Requesting GPS permission...";
+            Permission.RequestUserPermission(Permission.FineLocation);
+            yield return new WaitUntil(() =>
+                Permission.HasUserAuthorizedPermission(Permission.FineLocation));
+        }
+#endif
+
+        if (!Input.location.isEnabledByUser)
+        {
+            statusMessage = "GPS disabled";
+            yield break;
+        }
+
+        Input.location.Start(5f, 1f);
+        Input.compass.enabled = true;
+
+        float timeout = 30f;
+        while (Input.location.status == LocationServiceStatus.Initializing && timeout > 0)
+        {
+            timeout -= Time.deltaTime;
+            yield return null;
+        }
+
+        if (Input.location.status != LocationServiceStatus.Running)
+        {
+            statusMessage = "GPS retrying...";
+            yield return new WaitForSeconds(2f);
+            StartCoroutine(StartGPS());
+            yield break;
+        }
+
+        gpsReady = true;
+        statusMessage = "GPS Active";
+
+        lastGPS = new Vector2d(
+            Input.location.lastData.latitude,
+            Input.location.lastData.longitude
+        );
+
+        CenterMapOnGPS();
+    }
+
+    void UpdateMarkerFromGPS()
+    {
+        Vector2d newGPS = new Vector2d(
+            Input.location.lastData.latitude,
+            Input.location.lastData.longitude
+        );
+
+        float meters = Vector2d.Distance(newGPS, lastGPS) * 111000f;
+        if (meters < gpsMoveThresholdMeters) return;
+
+        lastGPS = newGPS;
+        CenterMapOnGPS();
+    }
+
+    void CenterMapOnGPS()
+    {
+        map.UpdateMap(lastGPS, currentZoom);
+        UpdatePlayerMarkerPosition();
+    }
+
+    void UpdatePlayerMarkerPosition()
+    {
+        Vector3 world = map.GeoToWorldPosition(lastGPS, false);
+        Vector3 screen = Camera.main.WorldToScreenPoint(map.transform.TransformPoint(world));
+        playerMarker.position = screen;
+    }
+
+    // ================= COMPASS =================
+
+    void UpdateMarkerRotation()
+    {
+        if (!Input.compass.enabled || Input.compass.headingAccuracy < 0) return;
+
+        float heading = Input.compass.magneticHeading;
+        float target = -heading;
+
+        currentRotation = Mathf.LerpAngle(
+            currentRotation,
+            target,
+            Time.deltaTime * rotationSmoothSpeed
+        );
+
+        playerMarker.localRotation = Quaternion.Euler(0, 0, currentRotation);
+    }
+
+    void UpdateCompassUI()
+    {
+        if (!Input.compass.enabled || compassImage == null) return;
+
+        float heading = Input.compass.magneticHeading;
+        compassImage.localRotation = Quaternion.Euler(0, 0, heading);
+    }
+
+    // ================= TOUCH =================
+
+    void HandleTouch()
+    {
+        var touches = Touch.activeTouches;
+
+        if (touches.Count == 1)
+            HandleDrag(touches[0]);
+
+        if (touches.Count == 2)
+            HandleZoom(touches);
+    }
+
+    void HandleDrag(Touch t)
+    {
+        if (t.phase == UnityEngine.InputSystem.TouchPhase.Began)
+            lastTouchPos = t.screenPosition;
+
+        if (t.phase == UnityEngine.InputSystem.TouchPhase.Moved)
+        {
+            Vector2 delta = t.screenPosition - lastTouchPos;
+            lastTouchPos = t.screenPosition;
+
+            Vector2d center = new Vector2d(
+                map.CenterLatitudeLongitude.x - delta.y * dragSensitivity,
+                map.CenterLatitudeLongitude.y - delta.x * dragSensitivity
+            );
+
+            map.UpdateMap(center, currentZoom);
+            UpdatePlayerMarkerPosition(); // keep marker fixed
+        }
+    }
+
+    void HandleZoom(ReadOnlyArray<Touch> touches)
+    {
+        float curr = Vector2.Distance(touches[0].screenPosition, touches[1].screenPosition);
+        float prev = Vector2.Distance(
+            touches[0].screenPosition - touches[0].delta,
+            touches[1].screenPosition - touches[1].delta
+        );
+
+        float delta = curr - prev;
+        if (Mathf.Abs(delta) < 1f) return;
+
+        currentZoom = Mathf.Clamp(
+            currentZoom + delta * zoomSensitivity,
+            minZoom,
+            maxZoom
+        );
+
+        map.UpdateMap(map.CenterLatitudeLongitude, currentZoom);
+        UpdatePlayerMarkerPosition();
+    }
+
+    // ================= ACCURACY =================
+
+    void UpdateAccuracyCircle()
+    {
+        if (accuracyCircle == null) return;
+
+        float accuracy = Mathf.Clamp(
+            Input.location.lastData.horizontalAccuracy,
+            minAccuracyMeters,
+            maxAccuracyMeters
+        );
+
+        float size = accuracy * accuracyPixelsPerMeter;
+
+        accuracyCircle.sizeDelta = Vector2.Lerp(
+            accuracyCircle.sizeDelta,
+            new Vector2(size, size),
+            Time.deltaTime * accuracySmoothSpeed
+        );
+
+        accuracyCircle.position = playerMarker.position;
+    }
+
+    // ================= UI =================
+
+    void UpdateDebugUI()
+    {
+        if (!debugText) return;
+
+        debugText.text =
+            $"GPS: {statusMessage}\n" +
+            $"Lat: {lastGPS.x:F6}\n" +
+            $"Lon: {lastGPS.y:F6}\n" +
+            $"Zoom: {currentZoom:F1}\n" +
+            $"Accuracy: {Input.location.lastData.horizontalAccuracy:F1}m\n" +
+            $"Heading: {Input.compass.magneticHeading:F1}";
+    }
+
+    public void RecenterMap()
+    {
+        if (!gpsReady) return;
+        CenterMapOnGPS();
     }
 }
