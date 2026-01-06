@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 using Mapbox.Unity.Map;
 
 public class MapPinchZoom : MonoBehaviour
@@ -41,3 +41,4 @@ public class MapPinchZoom : MonoBehaviour
             lastDistance = 0;
     }
 }
+*/

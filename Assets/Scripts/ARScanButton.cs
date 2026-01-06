@@ -7,6 +7,8 @@ public class ARScanButton : MonoBehaviour
 
     public void OnGoARButtonPressed()
     {
+
+        AppModeManager.Instance.currentMode = AppMode.AR;
         Debug.Log("AR Button Pressed!");
 
         if (EggManager.Instance == null)

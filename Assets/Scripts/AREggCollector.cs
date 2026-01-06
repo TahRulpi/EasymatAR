@@ -119,7 +119,8 @@ public class AREggCollector : MonoBehaviour
         // FIX: Only allow collection if exactly ONE finger is touching the screen.
         // This prevents the script from firing while the user is pinch-zooming the map.
         if (Input.touchCount > 1) return;
-
+        if (AppModeManager.Instance.currentMode != AppMode.AR)
+            return;
         // New Input System check for mobile touch
         if (Pointer.current != null && Pointer.current.press.wasPressedThisFrame)
         {
@@ -130,6 +131,8 @@ public class AREggCollector : MonoBehaviour
             PerformRaycast(touchPosition);
         }
     }
+   
+
 
     void PerformRaycast(Vector2 screenPos)
     {
