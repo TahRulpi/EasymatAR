@@ -132,14 +132,13 @@ GameObject:
   m_Component:
   - component: {fileID: 79038246}
   - component: {fileID: 79038245}
-  - component: {fileID: 79038247}
   m_Layer: 8
-  m_Name: Map
+  m_Name: MapboxAR_Internal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &79038245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154,7 +153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _options:
     locationOptions:
-      latitudeLongitude: 23.78081, 90.40749
+      latitudeLongitude: 0,0
       zoom: 16
     extentOptions:
       extentType: 1
@@ -177,7 +176,7 @@ MonoBehaviour:
       snapMapToZero: 0
     scalingOptions:
       scalingType: 1
-      unityTileSize: 100
+      unityTileSize: 1
     loadingTexture: {fileID: 1155210420}
     tileMaterial: {fileID: 1856476625}
   _initializeOnStart: 1
@@ -197,7 +196,7 @@ MonoBehaviour:
         useMipMap: 0
   _terrain:
     _layerProperty:
-      sourceType: 0
+      sourceType: 2
       sourceOptions:
         isActive: 1
         layerSource:
@@ -245,9 +244,9 @@ MonoBehaviour:
         entityPerCoroutine: 20
       vectorSubLayers: []
       locationPrefabList: []
-  _tileProvider: {fileID: 970545391}
+  _tileProvider: {fileID: 0}
   _previewOptions:
-    isPreviewEnabled: 1
+    isPreviewEnabled: 0
 --- !u!4 &79038246
 Transform:
   m_ObjectHideFlags: 0
@@ -260,28 +259,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 970545392}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &79038247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 79038244}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b55f37f9a6f7e44f7bb35e6bc3863847, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mapManager: {fileID: 79038245}
-  _deviceLocationProviderUnity: {fileID: 1263160411}
-  _deviceLocationProviderAndroid: {fileID: 0}
-  _editorLocationProvider: {fileID: 1263160411}
-  _transformLocationProvider: {fileID: 0}
-  _dontDestroyOnLoad: 0
 --- !u!1 &214860841
 GameObject:
   m_ObjectHideFlags: 0
@@ -450,11 +430,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1168625801}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 496, y: 959}
-  m_SizeDelta: {x: 190.2594, y: 173.8577}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -125, y: -415}
+  m_SizeDelta: {x: 190.2594, y: 173.85767}
+  m_Pivot: {x: 1, y: 1}
 --- !u!114 &228004515
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -576,6 +556,7 @@ GameObject:
   - component: {fileID: 256768336}
   - component: {fileID: 256768335}
   - component: {fileID: 256768340}
+  - component: {fileID: 256768341}
   m_Layer: 0
   m_Name: AR Camera
   m_TagString: MainCamera
@@ -728,7 +709,7 @@ MonoBehaviour:
   m_FocusMode: -1
   m_LightEstimationMode: -1
   m_AutoFocus: 1
-  m_LightEstimation: 0
+  m_LightEstimation: -1
   m_FacingDirection: 1
   m_RenderMode: 0
 --- !u!81 &256768338
@@ -802,6 +783,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe4da545d87820344a0aec52a15e5741, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &256768341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 256768333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b15f82cc229284894964d2d30806969d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HumanSegmentationStencilMode: 0
+  m_HumanSegmentationDepthMode: 0
+  m_EnvironmentDepthMode: 1
+  m_EnvironmentDepthTemporalSmoothing: 1
+  m_OcclusionPreferenceMode: 0
 --- !u!1 &294042817
 GameObject:
   m_ObjectHideFlags: 0
@@ -1027,50 +1025,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 440861503}
   m_CullTransparentMesh: 1
---- !u!1 &970545390
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 970545392}
-  - component: {fileID: 970545391}
-  m_Layer: 0
-  m_Name: TileProvider
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &970545391
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 970545390}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d7ff8ed3b76a4ee5a451d64a5393e3f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &970545392
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 970545390}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 79038246}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1117336650
 GameObject:
   m_ObjectHideFlags: 0
@@ -1117,11 +1071,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arOrigin: {fileID: 1347670628}
   statusText: {fileID: 214860843}
+  map: {fileID: 0}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
   greenEggPrefab: {fileID: 6274429174920703670, guid: 177edbcc44f3cb740b1c257cbe6646a7, type: 3}
   purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
   goldenEggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
   eggScale: 0.25
+  raycastManager: {fileID: 0}
 --- !u!28 &1155210420
 Texture2D:
   m_ObjectHideFlags: 0
@@ -1500,6 +1456,7 @@ GameObject:
   - component: {fileID: 1347670631}
   - component: {fileID: 1347670632}
   - component: {fileID: 1347670633}
+  - component: {fileID: 1347670634}
   m_Layer: 0
   m_Name: AR Session Origin
   m_TagString: Untagged
@@ -1533,7 +1490,7 @@ Transform:
   m_GameObject: {fileID: 1347670627}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.3650206, y: 0.49990088, z: -9.313226e-10}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1595,11 +1552,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arOrigin: {fileID: 1347670628}
   statusText: {fileID: 214860843}
+  map: {fileID: 79038245}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
   greenEggPrefab: {fileID: 6274429174920703670, guid: 177edbcc44f3cb740b1c257cbe6646a7, type: 3}
   purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
   goldenEggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
   eggScale: 100
+  raycastManager: {fileID: 0}
+--- !u!114 &1347670634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1347670627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3346fda1512c3694e918d2dcea8a5f25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isAligned: 0
 --- !u!1 &1446653673
 GameObject:
   m_ObjectHideFlags: 0

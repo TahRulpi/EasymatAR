@@ -1,136 +1,168 @@
-/*using System.Collections;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
+using TMPro;
+using Mapbox.Unity.Map;
+using Mapbox.Utils;
+using Mapbox.Unity.Utilities;
+using Mapbox.Unity.Location;
+
+using UnityEngine.XR.ARFoundation;
+using UnityEngine.XR.ARSubsystems;
+
 
 public class AREggSpawner : MonoBehaviour
 {
+    [Header("Setup References")]
     public XROrigin arOrigin;
+    public TextMeshProUGUI statusText;
+    public AbstractMap map; // Drag your 'MapboxAR_Internal' here
+
+    [Header("Egg Prefabs")]
     public GameObject redEggPrefab;
     public GameObject greenEggPrefab;
     public GameObject purpleEggPrefab;
     public GameObject goldenEggPrefab;
-    public float eggScale = 0.5f;
+    public float eggScale = 10.0f;
+
+    public ARRaycastManager raycastManager;
 
     private bool spawned = false;
 
     void OnEnable()
     {
+        if (statusText != null) statusText.text = "Initializing AR GPS...";
         StartCoroutine(SpawnEggsRoutine());
     }
 
     IEnumerator SpawnEggsRoutine()
     {
-        // Wait for main camera
-        while (Camera.main == null)
-            yield return null;
+        // 1. Wait for AR Tracking
+        while (ARSession.state != ARSessionState.SessionTracking) yield return null;
 
-        // Wait until ARSession tracking is ready
-        while (ARSession.state != ARSessionState.SessionTracking)
-            yield return null;
+        // 2. Wait for Compass Alignment
+        ARCompassAligner aligner = arOrigin.GetComponent<ARCompassAligner>();
+        if (aligner != null)
+        {
+            while (!aligner.isAligned)
+            {
+                if (statusText != null) statusText.text = "Calibrating Compass...";
+                yield return null;
+            }
+        }
 
-        yield return new WaitForSeconds(0.1f);
-
-        SpawnEggs();
+        // 3. Proceed with Spawning (Your existing code)
+        if (statusText != null) statusText.text = "GPS Ready! Spawning Eggs...";
+        SpawnEggsAtGpsLocations();
     }
 
-    *//*void SpawnEggs()
+
+
+    void SpawnEggsAtGpsLocations()
     {
         if (spawned) return;
-        if (EggManager.Instance == null)
-        {
-            Debug.LogError("EggManager.Instance is NULL in AR scene!");
-            return;
-        }
 
-        Camera cam = Camera.main;
-
-        if (EggManager.Instance.eggsToSpawn.Count == 0)
-        {
-            Debug.Log("Eggs list empty in AR scene, spawning default red egg in front of player.");
-            Vector3 arPos = arOrigin.transform.position + arOrigin.transform.forward * 1.0f;
-            GameObject egg = Instantiate(redEggPrefab, arPos, Quaternion.identity, arOrigin.transform);
-            egg.transform.localScale = Vector3.one * eggScale;
-            egg.transform.LookAt(cam.transform);
-            egg.transform.Rotate(0, 180f, 0);
-            Debug.Log("Default red egg spawned at: " + arPos);
-            spawned = true;
-            return;
-        }
-
-        foreach (var data in EggManager.Instance.eggsToSpawn)
-        {
-            Vector3 offset = GpsToARPosition(
-                data.latitude, data.longitude,
-                EggManager.Instance.playerLatitude,
-                EggManager.Instance.playerLongitude
-            );
-
-            Vector3 arPos = arOrigin.transform.position + offset;
-            arPos.y += 0.5f;
-
-            GameObject prefab = GetPrefabByType(data.eggType);
-            GameObject egg = Instantiate(prefab, arPos, Quaternion.identity, arOrigin.transform);
-            egg.transform.localScale = Vector3.one * eggScale;
-            egg.transform.LookAt(cam.transform);
-            egg.transform.Rotate(0, 180f, 0);
-
-            Debug.Log($"Egg spawned: {data.eggType} at GPS({data.latitude},{data.longitude}) -> ARPos {arPos}");
-        }
-
-        spawned = true;
-        Debug.Log("All eggs spawned successfully!");
-    }*//*
-
-    void SpawnEggs()
-    {
-        if (spawned) return;
         if (EggManager.Instance == null || EggManager.Instance.eggsToSpawn.Count == 0)
         {
-            Debug.LogError("No eggs to spawn in AR!");
+            if (statusText != null) statusText.text = "No eggs found in Manager!";
             return;
         }
 
-        Camera cam = Camera.main; // Get the actual AR camera
+        var locationProvider = LocationProviderFactory.Instance.DefaultLocationProvider;
+        Vector2d playerGps = locationProvider.CurrentLocation.LatitudeLongitude;
+        Vector3 playerArPos = arOrigin.transform.position;
 
-        // Position the start point 1.5m in front of the CAMERA'S current view
-        Vector3 startPos = cam.transform.position + cam.transform.forward * 1.5f;
-        float spacing = 0.5f;
-        int index = 0;
+        map.SetCenterLatitudeLongitude(playerGps);
+        map.UpdateMap();
+
+        SubscriptionTier tier = GameManager.Instance.currentTier;
+        float arScale = 0.001f;
 
         foreach (var data in EggManager.Instance.eggsToSpawn)
         {
-            // Use the camera's right vector for the line arrangement
-            Vector3 arPos = startPos + cam.transform.right * spacing * index;
+            if (!CanUserSeeEgg(tier, data.eggType)) continue;
 
-            // Match the height to the camera's height or slightly lower
-            arPos.y = cam.transform.position.y - 0.2f;
+            Vector2d eggGps = new Vector2d(data.latitude, data.longitude);
+            Vector3 worldOffset = Conversions.GeoToWorldPosition(eggGps, playerGps, map.WorldRelativeScale).ToVector3xz();
+            worldOffset *= arScale;
+
+            if (worldOffset.magnitude > 50f)
+                worldOffset = worldOffset.normalized * 50f;
+
+            /* Vector3 finalArPos = playerArPos + worldOffset;
+             finalArPos.y = arOrigin.Camera.transform.position.y - 1.2f;*/
+
+            Vector3 finalArPos = playerArPos + worldOffset;
+
+            // --- GROUND DETECTION START ---
+            List<ARRaycastHit> hits = new List<ARRaycastHit>();
+
+            Vector3 rayOrigin = arOrigin.Camera.transform.position;
+            Vector3 rayDirection = Vector3.down;
+
+            if (raycastManager != null &&
+                raycastManager.Raycast(new Ray(rayOrigin, rayDirection), hits, TrackableType.PlaneWithinBounds))
+            {
+                finalArPos.y = hits[0].pose.position.y;
+            }
+            else
+            {
+                // fallback if no plane found
+                finalArPos.y = arOrigin.Camera.transform.position.y - 1.2f;
+            }
+            // --- GROUND DETECTION END ---
+
 
             GameObject prefab = GetPrefabByType(data.eggType);
-            // Still parent to arOrigin to keep them in the AR world scale
-            GameObject egg = Instantiate(prefab, arPos, Quaternion.identity, arOrigin.transform);
 
-            egg.transform.localScale = Vector3.one * eggScale;
-            egg.transform.LookAt(cam.transform);
-            egg.transform.Rotate(0, 180f, 0);
+            // --- CORRECTED SECTION START ---
 
-            Debug.Log($"Egg spawned: {data.eggType} at ARPos {arPos}");
-            index++;
+            // 1. Instantiate with null parent first to ensure clean world-space scaling
+            GameObject egg = Instantiate(prefab, finalArPos, Quaternion.identity, null);
+
+            // 2. USE A MUCH LARGER SCALE
+            // If 1, 1.3, 1 is too small, we multiply it by a multiplier
+            float sizeMultiplier = 10f; // Increase this to 100f if still too small
+                                        // egg.transform.localScale = new Vector3(eggScale * sizeMultiplier, (eggScale * 1.3f) * sizeMultiplier, eggScale * sizeMultiplier);
+            egg.transform.localScale = new Vector3(eggScale * sizeMultiplier, (eggScale * 1.3f) * sizeMultiplier, eggScale * sizeMultiplier);
+
+            // 3. Lift the egg up so it's at eye level (easier to see)
+            Vector3 liftedPos = egg.transform.position;
+            // liftedPos.y = arOrigin.Camera.transform.position.y; // Set to camera height
+            liftedPos.y = arOrigin.Camera.transform.position.y - 0.5f;
+            egg.transform.position = liftedPos;
+
+            // egg.transform.SetParent(arOrigin.transform, true);
+
+           // GameObject egg = Instantiate(prefab, finalArPos, Quaternion.identity);
+            //egg.transform.localScale = Vector3.one * eggScale;
+
+           // egg.transform.SetParent(null);
+            // --- CORRECTED SECTION END ---
+            /*
+                        // Face player logic
+                        Vector3 lookTarget = arOrigin.Camera.transform.position;
+                        lookTarget.y = egg.transform.position.y;
+                        egg.transform.LookAt(lookTarget);
+                        egg.transform.Rotate(0, 180f, 0);*/
+
+            Debug.Log($"[AREggSpawner] Spawned {data.eggType} at {finalArPos} with scale {egg.transform.localScale}");
         }
 
         spawned = true;
-        Debug.Log("All eggs spawned successfully!");
+        if (statusText != null) statusText.text = $"Spawned {EggManager.Instance.eggsToSpawn.Count} eggs!";
     }
 
 
-    Vector3 GpsToARPosition(double eggLat, double eggLon, double playerLat, double playerLon)
+
+
+    bool CanUserSeeEgg(SubscriptionTier tier, EggType type)
     {
-        const double earthRadius = 6378137;
-        double dLat = (eggLat - playerLat) * Mathf.Deg2Rad;
-        double dLon = (eggLon - playerLon) * Mathf.Deg2Rad;
-        double x = dLon * earthRadius * Mathf.Cos((float)playerLat * Mathf.Deg2Rad);
-        double z = dLat * earthRadius;
-        return new Vector3((float)x, 0, (float)z);
+        if (tier == SubscriptionTier.None)
+            return (type == EggType.Red || type == EggType.Green);
+        return true;
     }
 
     GameObject GetPrefabByType(EggType type)
@@ -145,10 +177,9 @@ public class AREggSpawner : MonoBehaviour
         };
     }
 }
-*/
 
 
-using System.Collections;
+/*using System.Collections;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
@@ -201,7 +232,7 @@ public class AREggSpawner : MonoBehaviour
         if (statusText != null) statusText.text = ""; // Clear text after spawning
     }
 
-    /*void SpawnEggs()
+    *//*void SpawnEggs()
     {
         if (spawned) return;
 
@@ -237,7 +268,7 @@ public class AREggSpawner : MonoBehaviour
         }
 
         spawned = true;
-    }*/
+    }*//*
 
     void SpawnEggs()
     {
@@ -310,4 +341,5 @@ public class AREggSpawner : MonoBehaviour
             _ => redEggPrefab
         };
     }
-}
+}*/
+

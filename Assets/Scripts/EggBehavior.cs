@@ -79,3 +79,74 @@ public class EggBehavior : MonoBehaviour
 
 
 
+
+
+/*using UnityEngine;
+using Mapbox.Utils;
+using Mapbox.Unity.Map;
+using System;
+
+public class EggBehavior : MonoBehaviour
+{
+    [Header("Data")]
+    public Vector2d geoPosition;
+    public AbstractMap map;
+    public Transform player;
+    public DateTime spawnTime;
+    public EggType eggType;
+    public bool isCollectable;
+
+    [Header("Settings")]
+    public float collectionDistance = 10f; // Distance in Unity meters
+
+    void Update()
+    {
+        // 1. Keep the egg anchored to the map's GPS position
+        if (map != null)
+        {
+            Vector3 worldPos = map.GeoToWorldPosition(geoPosition, true);
+            worldPos.y = transform.position.y; // Maintain current height/bounce
+            transform.position = worldPos;
+        }
+
+        // 2. Simple distance check (Optional visual cue)
+        if (player != null)
+        {
+            float dist = Vector3.Distance(transform.position, player.position);
+            // You could change the egg's color or glow here if dist < collectionDistance
+        }
+    }
+
+    // This is called when the user clicks/taps the egg
+    private void OnMouseDown()
+    {
+        CheckCollection();
+    }
+
+    public void CheckCollection()
+    {
+        if (!isCollectable) return;
+
+        float distance = Vector3.Distance(transform.position, player.position);
+
+        if (distance <= collectionDistance)
+        {
+            Collect();
+        }
+        else
+        {
+            Debug.Log($"Too far! You are {distance:F1}m away. Need to be within {collectionDistance}m.");
+        }
+    }
+
+    private void Collect()
+    {
+        isCollectable = false;
+        Debug.Log($"Collected {eggType} egg!");
+
+        // Add logic here to update your inventory or score
+
+        // Destroy the egg or play a collection effect
+        Destroy(gameObject);
+    }
+}*/
