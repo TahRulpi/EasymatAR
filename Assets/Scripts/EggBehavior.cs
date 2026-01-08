@@ -31,6 +31,34 @@ public class EggBehavior : MonoBehaviour
 
     void Start()
     {
+
+
+        // --- NEW: Automatic Reference Finding ---
+        if (map == null)
+        {
+            map = FindObjectOfType<AbstractMap>();
+        }
+
+        if (player == null)
+        {
+            // Make sure your Player object in the hierarchy is tagged "Player"
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null) player = playerObj.transform;
+        }
+
+        // Existing logic
+        eggRenderer = GetComponentInChildren<Renderer>();
+        if (eggRenderer != null)
+        {
+            eggMaterial = eggRenderer.material;
+            eggMaterial.DisableKeyword("_EMISSION");
+        }
+
+        gameObject.SetActive(true);
+
+        if (map == null) map = FindObjectOfType<Mapbox.Unity.Map.AbstractMap>();
+        if (player == null) player = GameObject.FindGameObjectWithTag("Player").transform;
+
         eggRenderer = GetComponentInChildren<Renderer>();
         eggMaterial = eggRenderer.material;
 

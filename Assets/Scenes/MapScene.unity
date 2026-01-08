@@ -184,13 +184,11 @@ MonoBehaviour:
   accuracyCircle: {fileID: 1962586843}
   compassImage: {fileID: 1394345331}
   debugText: {fileID: 1225657892}
+  gpsLabel: {fileID: 625719339}
   minZoom: 14
   maxZoom: 20
   zoomSensitivity: 0.004
-  gpsLabel: {fileID: 625719339}
   gpsSmoothSpeed: 6
-  dragSensitivityBase: 0.0505
-  inertiaDecay: 0.85
   maxAllowedAccuracy: 30
   followPlayer: 0
 --- !u!1 &134224383
@@ -340,6 +338,7 @@ GameObject:
   - component: {fileID: 142677769}
   - component: {fileID: 142677770}
   - component: {fileID: 142677771}
+  - component: {fileID: 142677772}
   m_Layer: 0
   m_Name: Map
   m_TagString: Untagged
@@ -539,6 +538,18 @@ MonoBehaviour:
   zoomSpeed: 0.5
   minZoom: 14
   maxZoom: 18
+--- !u!114 &142677772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142677766}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6a63783bcde8a54695abf7e56cfe3fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!28 &223974226
 Texture2D:
   m_ObjectHideFlags: 0
@@ -1012,7 +1023,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.38649377, g: 0.3469651, b: 0.6509434, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1035,7 +1046,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
@@ -1306,7 +1317,7 @@ MonoBehaviour:
   map: {fileID: 142677767}
   player: {fileID: 1499416710}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
-  greenEggPrefab: {fileID: 6274429174920703670, guid: 177edbcc44f3cb740b1c257cbe6646a7, type: 3}
+  greenEggPrefab: {fileID: 6274429174920703670, guid: 27749618793321d46a735df525700709, type: 3}
   purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
   goldenEggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
   eggInputList:
@@ -1317,8 +1328,8 @@ MonoBehaviour:
     latitude: 23.780855
     longitude: 90.407604
   - eggType: 2
-    latitude: 23.78086
-    longitude: 90.40491
+    latitude: 23.780885
+    longitude: 90.40474
   - eggType: 3
     latitude: 23.780885
     longitude: 90.40767
@@ -1674,8 +1685,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 68, y: -425}
-  m_SizeDelta: {x: 580.0071, y: 152.1985}
+  m_AnchoredPosition: {x: 68, y: -171.14}
+  m_SizeDelta: {x: 477.54, y: 520.11}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1225657892
 MonoBehaviour:
@@ -1707,7 +1718,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.028301895, g: 0.023362413, b: 0.023362413, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1804,7 +1815,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1394345331
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2046,7 +2057,7 @@ GameObject:
   - component: {fileID: 1499416714}
   m_Layer: 0
   m_Name: PlayerIcon
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
