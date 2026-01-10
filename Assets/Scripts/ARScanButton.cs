@@ -7,7 +7,6 @@ public class ARScanButton : MonoBehaviour
 
     public void OnGoARButtonPressed()
     {
-
         AppModeManager.Instance.currentMode = AppMode.AR;
         Debug.Log("AR Button Pressed!");
 
@@ -21,13 +20,8 @@ public class ARScanButton : MonoBehaviour
         EggManager.Instance.playerLatitude = Input.location.lastData.latitude;
         EggManager.Instance.playerLongitude = Input.location.lastData.longitude;
 
-        // Clear previous eggs
-        EggManager.Instance.eggsToSpawn.Clear();
-
-        bool hasEggs = false;
-
-        // Add eggs from map spawner
-        if (mapEggSpawner != null && mapEggSpawner.spawnedEggs != null)
+        // Only populate eggs if the list is empty
+        if (EggManager.Instance.eggsToSpawn.Count == 0 && mapEggSpawner != null)
         {
             foreach (var egg in mapEggSpawner.spawnedEggs)
             {
@@ -41,12 +35,11 @@ public class ARScanButton : MonoBehaviour
                 };
 
                 EggManager.Instance.eggsToSpawn.Add(data);
-                hasEggs = true;
             }
         }
 
-        // If no eggs, add default red egg at player location
-        if (!hasEggs)
+        // If still empty, add default red egg at player location
+        if (EggManager.Instance.eggsToSpawn.Count == 0)
         {
             EggData defaultEgg = new EggData
             {
@@ -63,4 +56,5 @@ public class ARScanButton : MonoBehaviour
         // Load AR scene
         SceneManager.LoadScene("ARScene");
     }
+
 }
