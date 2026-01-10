@@ -1474,18 +1474,18 @@ MonoBehaviour:
   purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
   goldenEggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
   eggInputList:
-  - eggType: 1
-    latitude: 23.780865
-    longitude: 90.40755
   - eggType: 0
+    latitude: 23.780875
+    longitude: 90.40755
+  - eggType: 1
     latitude: 23.780855
-    longitude: 90.407604
+    longitude: 90.40755
   - eggType: 2
-    latitude: 23.780885
-    longitude: 90.40474
+    latitude: 23.780895
+    longitude: 90.40755
   - eggType: 3
-    latitude: 23.780885
-    longitude: 90.40767
+    latitude: 23.780835
+    longitude: 90.40755
 --- !u!1 &943353762
 GameObject:
   m_ObjectHideFlags: 0

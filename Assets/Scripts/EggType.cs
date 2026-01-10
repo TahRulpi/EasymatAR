@@ -32,6 +32,7 @@ public class EggData
     public EggType eggType;
     public double latitude;
     public double longitude;
+    public bool isCollected = false; // NEW: track if collected in AR
 }
 
 public enum EggType

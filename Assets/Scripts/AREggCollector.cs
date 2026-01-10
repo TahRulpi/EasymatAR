@@ -58,25 +58,35 @@ public class AREggCollector : MonoBehaviour
     // --- LOGIC UNCHANGED ---
     void CheckCollectionEligibility(EggBehavior egg)
     {
+        if (egg.isCollected)
+        {
+            Debug.Log("Egg already collected!");
+            return; // Cannot collect again
+        }
+
         SubscriptionTier tier = GameManager.Instance.currentTier;
 
         switch (tier)
         {
-            case SubscriptionTier.None:
+            case SubscriptionTier.None: // Free
                 if ((egg.eggType == EggType.Red || egg.eggType == EggType.Green) && totalCollectedThisSession < 1)
                 {
-                    CollectEgg(egg.gameObject);
+                    CollectEgg(egg);
                 }
                 else if (totalCollectedThisSession >= 1)
                 {
                     Debug.Log("None Tier: Limit reached (1 egg max).");
+                }
+                else
+                {
+                    Debug.Log("None Tier: Cannot collect this egg type.");
                 }
                 break;
 
             case SubscriptionTier.Pro:
                 if (totalCollectedThisSession < 1)
                 {
-                    CollectEgg(egg.gameObject);
+                    CollectEgg(egg);
                 }
                 else
                 {
@@ -85,110 +95,42 @@ public class AREggCollector : MonoBehaviour
                 break;
 
             case SubscriptionTier.Premium:
-                CollectEgg(egg.gameObject);
+                CollectEgg(egg);
                 break;
         }
     }
 
-    void CollectEgg(GameObject egg)
+
+    void CollectEgg(EggBehavior egg)
     {
         totalCollectedThisSession++;
-        Debug.Log($"?? Egg Collected! Total this session: {totalCollectedThisSession}");
-        Destroy(egg);
-    }
 
-    public static void ResetCollectionCount()
-    {
-        totalCollectedThisSession = 0;
-    }
-}
+        // Mark egg as collected in AR
+        egg.isCollected = true;
 
-
-/*
-using UnityEngine;
-using UnityEngine.InputSystem;
-
-public class AREggCollector : MonoBehaviour
-{
-    private Camera arCamera;
-    private static int totalCollectedThisSession = 0;
-
-    void Start()
-    {
-        arCamera = Camera.main;
-    }
-
-    void Update()
-    {
-        // ? Use ONLY New Input System
-        if (Touchscreen.current == null) return;
-
-        var touches = Touchscreen.current.touches;
-
-        // ? Ignore pinch / multi-touch (allows map zoom)
-        if (touches.Count > 1)
-            return;
-
-        // ? Single finger tap only
-        if (touches.Count == 1 && touches[0].press.wasPressedThisFrame)
+        // ALSO mark it in EggManager so map won't show it
+        foreach (var data in EggManager.Instance.eggsToSpawn)
         {
-            Vector2 touchPosition = touches[0].position.ReadValue();
-            Debug.Log("?? Touch Detected at: " + touchPosition);
-            PerformRaycast(touchPosition);
-        }
-    }
-
-    void PerformRaycast(Vector2 screenPos)
-    {
-        Ray ray = arCamera.ScreenPointToRay(screenPos);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, 100f))
-        {
-            if (hit.collider.CompareTag("Egg"))
+            if (Mathf.Approximately((float)data.latitude, (float)egg.geoPosition.x) &&
+                Mathf.Approximately((float)data.longitude, (float)egg.geoPosition.y))
             {
-                EggBehavior eggScript = hit.collider.GetComponent<EggBehavior>();
-                if (eggScript != null)
-                {
-                    CheckCollectionEligibility(eggScript);
-                }
+                data.isCollected = true;
+                break;
             }
         }
+
+        Destroy(egg.gameObject);
+
+        Debug.Log($"? Egg Collected! Type: {egg.eggType}, Total this session: {totalCollectedThisSession}");
     }
 
-    // --- LOGIC UNCHANGED ---
-    void CheckCollectionEligibility(EggBehavior egg)
-    {
-        SubscriptionTier tier = GameManager.Instance.currentTier;
 
-        switch (tier)
-        {
-            case SubscriptionTier.None:
-                if ((egg.eggType == EggType.Red || egg.eggType == EggType.Green) && totalCollectedThisSession < 1)
-                    CollectEgg(egg.gameObject);
-                break;
 
-            case SubscriptionTier.Pro:
-                if (totalCollectedThisSession < 1)
-                    CollectEgg(egg.gameObject);
-                break;
-
-            case SubscriptionTier.Premium:
-                CollectEgg(egg.gameObject);
-                break;
-        }
-    }
-
-    void CollectEgg(GameObject egg)
-    {
-        totalCollectedThisSession++;
-        Debug.Log($"?? Egg Collected! Total: {totalCollectedThisSession}");
-        Destroy(egg);
-    }
 
     public static void ResetCollectionCount()
     {
         totalCollectedThisSession = 0;
     }
 }
-*/
+
+
