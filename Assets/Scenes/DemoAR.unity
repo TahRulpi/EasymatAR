@@ -810,7 +810,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 256768333}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe4da545d87820344a0aec52a15e5741, type: 3}
   m_Name: 
@@ -822,7 +822,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 256768333}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b15f82cc229284894964d2d30806969d, type: 3}
   m_Name: 
@@ -1285,7 +1285,6 @@ MonoBehaviour:
   arOrigin: {fileID: 1347670628}
   statusText: {fileID: 214860843}
   map: {fileID: 79038245}
-  raycastManager: {fileID: 0}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
   greenEggPrefab: {fileID: 6274429174920703670, guid: 27749618793321d46a735df525700709, type: 3}
   purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
@@ -1358,7 +1357,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1168625798
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1669,8 +1668,10 @@ GameObject:
   - component: {fileID: 1347670628}
   - component: {fileID: 1347670630}
   - component: {fileID: 1347670631}
+  - component: {fileID: 1347670632}
   - component: {fileID: 1347670633}
   - component: {fileID: 1347670634}
+  - component: {fileID: 1347670635}
   m_Layer: 0
   m_Name: AR Session Origin
   m_TagString: Untagged
@@ -1723,7 +1724,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa17d122634046b4a8e23048891fafc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RaycastPrefab: {fileID: 0}
+  m_RaycastPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
 --- !u!114 &1347670631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1737,7 +1738,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_PlanePrefab: {fileID: 8799314801460970655, guid: 5a890565c88f92945bce08877b6aae3e, type: 3}
-  m_DetectionMode: 1
+  m_DetectionMode: -1
+--- !u!114 &1347670632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1347670627}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72f34fb5e581d6744bba869b4d953511, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  eggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
+  forcedScale: {x: 0.2, y: 0.2, z: 0.2}
 --- !u!114 &1347670633
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1745,7 +1760,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1347670627}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0fe434caf9380db47a0f4db0a8b23fc0, type: 3}
   m_Name: 
@@ -1753,14 +1768,26 @@ MonoBehaviour:
   arOrigin: {fileID: 1347670628}
   statusText: {fileID: 214860843}
   map: {fileID: 79038245}
-  raycastManager: {fileID: 1347670630}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
   greenEggPrefab: {fileID: 6274429174920703670, guid: 27749618793321d46a735df525700709, type: 3}
   purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
   goldenEggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
-  eggScale: 50
-  floorY: -0.3
+  eggScale: 100
+  floorY: 0
 --- !u!114 &1347670634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1347670627}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3346fda1512c3694e918d2dcea8a5f25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isAligned: 0
+--- !u!114 &1347670635
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1769,10 +1796,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1347670627}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3346fda1512c3694e918d2dcea8a5f25, type: 3}
+  m_Script: {fileID: 11500000, guid: 5b759e887ef4873458c7b4135918a105, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isAligned: 0
+  eggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
 --- !u!1 &1446653673
 GameObject:
   m_ObjectHideFlags: 0
