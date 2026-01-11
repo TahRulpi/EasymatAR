@@ -15,13 +15,13 @@ public class EggSpawner : MonoBehaviour
     public AbstractMap map;
     public Transform player;
 
-    [System.Serializable]
+    /*[System.Serializable]
     public class EggData
     {
         public EggType eggType;     // Red, Green, Purple, Golden
         public double latitude;
         public double longitude;
-    }
+    }*/
 
     [Header("Egg Prefabs")]
     public GameObject redEggPrefab;
@@ -68,8 +68,9 @@ public class EggSpawner : MonoBehaviour
             return;
         }
 
-        /*foreach (EggData data in eggInputList)
+        foreach (EggData data in eggInputList)
         {
+            if (data.isCollected) continue; // <-- skip if already collected in AR
             GameObject prefab = GetPrefabByType(data.eggType);
             if (prefab == null) continue;
 
@@ -97,37 +98,9 @@ public class EggSpawner : MonoBehaviour
             }
 
             Debug.Log($"Egg spawned: {data.eggType} @ {gpsPos}");
-        }*/
-
-        foreach (EggData data in eggInputList)
-        {
-            if (data.isCollected) continue; // <-- skip if already collected in AR
-
-            GameObject prefab = GetPrefabByType(data.eggType);
-            if (prefab == null) continue;
-
-            Vector2d gpsPos = new Vector2d(data.latitude, data.longitude);
-            Vector3 worldPos = map.GeoToWorldPosition(gpsPos, true);
-            worldPos.y += 2f; // Lift above map
-
-            GameObject egg = Instantiate(prefab, worldPos, Quaternion.identity);
-            egg.transform.SetParent(map.transform, true);
-
-            EggBehavior behavior = egg.GetComponent<EggBehavior>();
-            if (behavior != null)
-            {
-                behavior.geoPosition = gpsPos;
-                behavior.map = map;
-                behavior.player = player;
-                behavior.spawnTime = DateTime.Now;
-                behavior.eggType = data.eggType;
-                behavior.isCollectable = true;
-
-                spawnedEggs.Add(behavior);
-            }
-
-            Debug.Log($"Egg spawned: {data.eggType} @ {gpsPos}");
         }
+
+
 
     }
 

@@ -59,11 +59,10 @@ public class EggBehavior : MonoBehaviour
 
     void Update()
     {
-        // ?? In AR mode, AR spawner controls position — do nothing
+        // ?? AR eggs must NOT move with Mapbox
         if (isARMode)
             return;
 
-        // ?? Non-AR (Map mode) behavior
         if (player == null || map == null)
             return;
 
@@ -71,6 +70,7 @@ public class EggBehavior : MonoBehaviour
         worldPos.y += 0.5f;
         transform.position = worldPos;
     }
+
 
     // Optional: CanSeeEgg logic simplified
     public bool CanSeeEgg()

@@ -1327,13 +1327,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arOrigin: {fileID: 1347670628}
+  raycastManager: {fileID: 1347670630}
+  planeManager: {fileID: 1347670631}
   statusText: {fileID: 214860843}
-  raycastManager: {fileID: 0}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
   greenEggPrefab: {fileID: 6274429174920703670, guid: 27749618793321d46a735df525700709, type: 3}
   purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
   goldenEggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
   eggScale: 0.25
+  floorOffset: 0.02
 --- !u!28 &1155210420
 Texture2D:
   m_ObjectHideFlags: 0
@@ -1793,13 +1795,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arOrigin: {fileID: 1347670628}
-  statusText: {fileID: 214860843}
   raycastManager: {fileID: 1347670630}
+  planeManager: {fileID: 0}
+  statusText: {fileID: 214860843}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
   greenEggPrefab: {fileID: 6274429174920703670, guid: 27749618793321d46a735df525700709, type: 3}
   purpleEggPrefab: {fileID: 6274429174920703670, guid: 469039e15a1ac494e891aa7cb868d1ef, type: 3}
   goldenEggPrefab: {fileID: 6274429174920703670, guid: 92472a68b99d00e4dbaebc65e3524e68, type: 3}
   eggScale: 50
+  floorOffset: 0.02
 --- !u!114 &1347670634
 MonoBehaviour:
   m_ObjectHideFlags: 0
