@@ -32,10 +32,10 @@ public class AREggCollector : MonoBehaviour
             PerformRaycast(touchPosition);
         }
     }
-   
 
 
-    void PerformRaycast(Vector2 screenPos)
+
+    /*void PerformRaycast(Vector2 screenPos)
     {
         Ray ray = arCamera.ScreenPointToRay(screenPos);
         RaycastHit hit;
@@ -53,16 +53,37 @@ public class AREggCollector : MonoBehaviour
                 }
             }
         }
+    }*/
+    void PerformRaycast(Vector2 screenPos)
+    {
+        Ray ray = arCamera.ScreenPointToRay(screenPos);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+        {
+            // ?? IMPORTANT: get EggBehavior from parent OR self
+            EggBehavior egg = hit.collider.GetComponentInParent<EggBehavior>();
+
+            if (egg == null)
+            {
+                Debug.Log("? Hit object but not an egg");
+                return;
+            }
+
+            Debug.Log("?? Egg touched: " + egg.eggType);
+            CheckCollectionEligibility(egg);
+        }
     }
+
 
     // --- LOGIC UNCHANGED ---
     void CheckCollectionEligibility(EggBehavior egg)
     {
-        if (egg.isCollected)
+        if (egg == null || egg.isCollected)
         {
-            Debug.Log("Egg already collected!");
-            return; // Cannot collect again
+            Debug.Log("?? Egg already collected or null");
+            return;
         }
+
 
         SubscriptionTier tier = GameManager.Instance.currentTier;
 
@@ -100,29 +121,46 @@ public class AREggCollector : MonoBehaviour
         }
     }
 
+    
 
     void CollectEgg(EggBehavior egg)
     {
+        if (egg == null || egg.isCollected)
+            return;
+
+        egg.isCollected = true;
         totalCollectedThisSession++;
 
-        // Mark egg as collected in AR
-        egg.isCollected = true;
+        // ?? IMMEDIATELY hide EVERYTHING visible
+        foreach (var r in egg.GetComponentsInChildren<Renderer>(true))
+            r.enabled = false;
 
-        // ALSO mark it in EggManager so map won't show it
-        foreach (var data in EggManager.Instance.eggsToSpawn)
+        foreach (var c in egg.GetComponentsInChildren<Collider>(true))
+            c.enabled = false;
+
+        // Mark collected in data
+        if (EggManager.Instance != null)
         {
-            if (Mathf.Approximately((float)data.latitude, (float)egg.geoPosition.x) &&
-                Mathf.Approximately((float)data.longitude, (float)egg.geoPosition.y))
+            foreach (var data in EggManager.Instance.eggsToSpawn)
             {
-                data.isCollected = true;
-                break;
+                if (Mathf.Abs((float)data.latitude - (float)egg.geoPosition.x) < 0.00001f &&
+                    Mathf.Abs((float)data.longitude - (float)egg.geoPosition.y) < 0.00001f)
+                {
+                    data.isCollected = true;
+                    break;
+                }
             }
         }
 
-        Destroy(egg.gameObject);
+        // ?? Destroy AFTER visuals are gone
+        Destroy(egg.gameObject, 0.1f);
 
-        Debug.Log($"? Egg Collected! Type: {egg.eggType}, Total this session: {totalCollectedThisSession}");
+        Debug.Log("? Egg visually removed + destroyed");
     }
+
+
+
+
 
 
 

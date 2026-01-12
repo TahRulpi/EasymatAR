@@ -22,7 +22,7 @@ public class AREggSpawner : MonoBehaviour
     public GameObject goldenEggPrefab;
 
     [Header("Egg Settings")]
-    public float eggScale = 5f; // Bigger for 3D
+    public float eggScale =100f;// Bigger for 3D
     public float floorOffset = 0.08f; // Lift egg above floor
 
     private bool spawned = false;
@@ -47,7 +47,7 @@ public class AREggSpawner : MonoBehaviour
         var playerLoc = LocationProviderFactory.Instance.DefaultLocationProvider.CurrentLocation;
         Vector2d playerLatLon;
 
-        if (!playerLoc.IsLocationUpdated)
+        /*if (!playerLoc.IsLocationUpdated)
         {
             // Use default test coordinates (allows editor testing or GPS not ready)
             playerLatLon = new Vector2d(23.752407, 90.352974);
@@ -58,8 +58,8 @@ public class AREggSpawner : MonoBehaviour
         {
             playerLatLon = playerLoc.LatitudeLongitude;
             statusText?.SetText("?? GPS ready — placing eggs");
-        }
-        /*if (!playerLoc.IsLocationUpdated)
+        }*/
+        if (!playerLoc.IsLocationUpdated)
         {
             // Use location from Map scene
             playerLatLon = PlayerLocationHolder.LastKnownLocation;
@@ -70,12 +70,14 @@ public class AREggSpawner : MonoBehaviour
         {
             playerLatLon = playerLoc.LatitudeLongitude;
             statusText?.SetText("?? GPS ready — placing eggs");
-        }*/
+        }
 
 
         // 3?? Spawn eggs in AR
         foreach (var data in EggManager.Instance.eggsToSpawn)
         {
+            if (data.isCollected)
+                continue; // ?? DO NOT SPAWN COLLECTED EGGS
             GameObject prefab = GetPrefabByType(data.eggType);
             if (prefab == null) continue;
 
@@ -113,11 +115,11 @@ public class AREggSpawner : MonoBehaviour
                 eb.geoPosition = eggLatLon;
             }
 
-            Debug.Log($"? Spawned {data.eggType} at {relativeMeters.magnitude:F1} meters");
+            Debug.Log($"? AR Spawned {data.eggType} at {relativeMeters.magnitude:F1} meters");
         }
 
         spawned = true;
-        statusText?.SetText("?? Eggs spawned on real floor!");
+        statusText?.SetText("?? AR Eggs spawned on real floor!");
     }
 
     GameObject GetPrefabByType(EggType type)

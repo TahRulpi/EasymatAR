@@ -109,7 +109,7 @@ public class EggSpawner : MonoBehaviour
         egg.localScale = Vector3.zero;
         float duration = 0.5f;
         float elapsed = 0f;
-        Vector3 targetScale = Vector3.one * 400f;
+        Vector3 targetScale = Vector3.one * 800f;
 
         while (elapsed < duration)
         {

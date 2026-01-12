@@ -1328,7 +1328,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arOrigin: {fileID: 1347670628}
   raycastManager: {fileID: 1347670630}
-  planeManager: {fileID: 1347670631}
   statusText: {fileID: 214860843}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
   greenEggPrefab: {fileID: 6274429174920703670, guid: 27749618793321d46a735df525700709, type: 3}
@@ -1780,7 +1779,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1760703bbd54c04488a8d10600262ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PlanePrefab: {fileID: 8799314801460970655, guid: 5a890565c88f92945bce08877b6aae3e, type: 3}
+  m_PlanePrefab: {fileID: 0}
   m_DetectionMode: 1
 --- !u!114 &1347670633
 MonoBehaviour:
@@ -1796,7 +1795,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arOrigin: {fileID: 1347670628}
   raycastManager: {fileID: 1347670630}
-  planeManager: {fileID: 0}
   statusText: {fileID: 214860843}
   redEggPrefab: {fileID: 6274429174920703670, guid: d8666bbf01ac0da41a023cfeca60208a, type: 3}
   greenEggPrefab: {fileID: 6274429174920703670, guid: 27749618793321d46a735df525700709, type: 3}
