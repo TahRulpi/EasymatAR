@@ -27,7 +27,7 @@ public class AREggSpawner : MonoBehaviour
     
     private bool spawned = false;
     private readonly List<ARRaycastHit> hits = new List<ARRaycastHit>();
-   // int index = 0;
+    int index = 0;
     void Update()
     {
         if (spawned) return;
@@ -96,14 +96,14 @@ public class AREggSpawner : MonoBehaviour
 
             float eggHeight = prefab.GetComponent<Renderer>().bounds.size.y;
             // Vector3 finalPos = floorPos + offset + Vector3.up * floorOffset;
-            /*float spacingRadius = 0.4f; // 40 cm
+            float spacingRadius = 0.4f; // 40 cm
             float angle = index * 60f * Mathf.Deg2Rad;
 
             Vector3 spreadOffset = new Vector3(
                 Mathf.Cos(angle),
                 0,
                 Mathf.Sin(angle)
-            ) * spacingRadius;*/
+            ) * spacingRadius;
 
              Vector3 finalPos = floorPos + Vector3.up * floorOffset - Vector3.up * (eggHeight / 2f);
           //  Vector3 finalPos = floorPos + offset + spreadOffset + Vector3.up * floorOffset;
