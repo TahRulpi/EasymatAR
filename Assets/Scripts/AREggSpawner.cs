@@ -24,10 +24,10 @@ public class AREggSpawner : MonoBehaviour
     [Header("Egg Settings")]
     public float eggScale = 1f;// Bigger for 3D
     public float floorOffset = 0.08f; // Lift egg above floor
-    float eggHeight = prefab.GetComponent<Renderer>().bounds.size.y;
+    
     private bool spawned = false;
     private readonly List<ARRaycastHit> hits = new List<ARRaycastHit>();
-
+   // int index = 0;
     void Update()
     {
         if (spawned) return;
@@ -94,11 +94,27 @@ public class AREggSpawner : MonoBehaviour
             if (offset.magnitude > 15f)
                 offset = offset.normalized * 15f;
 
+            float eggHeight = prefab.GetComponent<Renderer>().bounds.size.y;
             // Vector3 finalPos = floorPos + offset + Vector3.up * floorOffset;
-            Vector3 finalPos = floorPos + Vector3.up * floorOffset - Vector3.up * (eggHeight / 2f);
+            /*float spacingRadius = 0.4f; // 40 cm
+            float angle = index * 60f * Mathf.Deg2Rad;
+
+            Vector3 spreadOffset = new Vector3(
+                Mathf.Cos(angle),
+                0,
+                Mathf.Sin(angle)
+            ) * spacingRadius;*/
+
+             Vector3 finalPos = floorPos + Vector3.up * floorOffset - Vector3.up * (eggHeight / 2f);
+          //  Vector3 finalPos = floorPos + offset + spreadOffset + Vector3.up * floorOffset;
+
 
             // Spawn egg
             GameObject egg = Instantiate(prefab, finalPos, Quaternion.identity, arOrigin.transform);
+            Vector3 correctedPos = egg.transform.position;
+            correctedPos.y = floorPos.y + floorOffset;
+            egg.transform.position = correctedPos;
+
 
             // ? Make egg 3D and visible
             egg.transform.localScale = Vector3.one * eggScale;
