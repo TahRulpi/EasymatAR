@@ -22,9 +22,9 @@ public class AREggSpawner : MonoBehaviour
     public GameObject goldenEggPrefab;
 
     [Header("Egg Settings")]
-    public float eggScale =100f;// Bigger for 3D
+    public float eggScale = 1f;// Bigger for 3D
     public float floorOffset = 0.08f; // Lift egg above floor
-
+    float eggHeight = prefab.GetComponent<Renderer>().bounds.size.y;
     private bool spawned = false;
     private readonly List<ARRaycastHit> hits = new List<ARRaycastHit>();
 
@@ -51,25 +51,25 @@ public class AREggSpawner : MonoBehaviour
         {
             // Use default test coordinates (allows editor testing or GPS not ready)
             playerLatLon = new Vector2d(23.752407, 90.352974);
-            statusText?.SetText("?? GPS not ready — using test coordinates");
-            Debug.Log("?? GPS not ready — using test coordinates");
+            statusText?.SetText("?? GPS not ready ? using test coordinates");
+            Debug.Log("?? GPS not ready ? using test coordinates");
         }
         else
         {
             playerLatLon = playerLoc.LatitudeLongitude;
-            statusText?.SetText("?? GPS ready — placing eggs");
+            statusText?.SetText("?? GPS ready ? placing eggs");
         }*/
         if (!playerLoc.IsLocationUpdated)
         {
             // Use location from Map scene
             playerLatLon = PlayerLocationHolder.LastKnownLocation;
             statusText?.SetText("?? Using map location for AR");
-            Debug.Log($"?? GPS not ready — using map location: {playerLatLon.x}, {playerLatLon.y}");
+            Debug.Log($"?? GPS not ready ? using map location: {playerLatLon.x}, {playerLatLon.y}");
         }
         else
         {
             playerLatLon = playerLoc.LatitudeLongitude;
-            statusText?.SetText("?? GPS ready — placing eggs");
+            statusText?.SetText("?? GPS ready ? placing eggs");
         }
 
 
@@ -94,7 +94,8 @@ public class AREggSpawner : MonoBehaviour
             if (offset.magnitude > 15f)
                 offset = offset.normalized * 15f;
 
-            Vector3 finalPos = floorPos + offset + Vector3.up * floorOffset;
+            // Vector3 finalPos = floorPos + offset + Vector3.up * floorOffset;
+            Vector3 finalPos = floorPos + Vector3.up * floorOffset - Vector3.up * (eggHeight / 2f);
 
             // Spawn egg
             GameObject egg = Instantiate(prefab, finalPos, Quaternion.identity, arOrigin.transform);
@@ -418,8 +419,8 @@ public class AREggSpawner : MonoBehaviour
             // TEMP: assign test coordinates for quick AR testing
             playerLatLon = new Vector2d(23.752407, 90.352974);
             if (statusText != null)
-                statusText.text = "?? GPS not ready — using test coordinates";
-            Debug.Log("?? GPS not ready — using test coordinates");
+                statusText.text = "?? GPS not ready ? using test coordinates";
+            Debug.Log("?? GPS not ready ? using test coordinates");
         }
         else
         {

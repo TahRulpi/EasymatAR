@@ -1496,11 +1496,11 @@ MonoBehaviour:
     longitude: 90.407571
     isCollected: 0
   - eggType: 2
-    latitude: 23.780732
+    latitude: 23.780692
     longitude: 90.407571
     isCollected: 0
   - eggType: 3
-    latitude: 23.780832
+    latitude: 23.780592
     longitude: 90.407571
     isCollected: 0
 --- !u!1 &943353762
@@ -2447,7 +2447,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: def021e25faec2e4787d970742ec8903, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentTier: 1
+  currentTier: 2
 --- !u!114 &1754627260
 MonoBehaviour:
   m_ObjectHideFlags: 0
